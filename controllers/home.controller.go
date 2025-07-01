@@ -4,6 +4,7 @@ import (
 	"fgo24-be-tickitz/models"
 	"fgo24-be-tickitz/utils"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx"
@@ -48,5 +49,32 @@ func GetListMovies(ctx *gin.Context) {
 		Success: true,
 		Message: "List Movies",
 		Results: movies,
+	})
+}
+
+func GetMovieByID(ctx *gin.Context) {
+	idx := ctx.Param("id")
+	id, err := strconv.Atoi(idx)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, utils.Response{
+			Success: false,
+			Message: "Invalid movie ID",
+		})
+		return
+	}
+
+	movie, err := models.FindMovieByID(id)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, utils.Response{
+			Success: false,
+			Message: "Failed to show movies by id",
+			Errors:  err.Error(),
+		})
+	}
+
+	ctx.JSON(http.StatusOK, utils.Response{
+		Success: true,
+		Message: "List Movie By ID",
+		Results: movie,
 	})
 }

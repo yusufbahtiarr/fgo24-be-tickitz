@@ -50,3 +50,24 @@ func FindListMovies(title string) (Movies, error) {
 
 	return movies, err
 }
+
+func FindMovieByID(id int) (Movie, error) {
+	conn, err := db.ConnectDB()
+	if err != nil {
+		return Movie{}, err
+	}
+	defer conn.Close()
+
+	query := "SELECT id, poster_url, backdrop_url, title, release_date, runtime, overview, rating, id_director FROM movies WHERE id = $1"
+	rows, err := conn.Query(context.Background(), query, id)
+	if err != nil {
+		return Movie{}, err
+	}
+
+	movie, err := pgx.CollectOneRow[Movie](rows, pgx.RowToStructByName)
+	if err != nil {
+		return Movie{}, err
+	}
+
+	return movie, err
+}
