@@ -27,3 +27,24 @@ func FindUpcomingMovies() (Movies, error) {
 
 	return movies, err
 }
+
+func FindListMovies() (Movies, error) {
+	conn, err := db.ConnectDB()
+	if err != nil {
+		return Movies{}, err
+	}
+	defer conn.Close()
+
+	query := "SELECT id, poster_url, backdrop_url, title, release_date, runtime, overview, rating, id_director FROM movies"
+	rows, err := conn.Query(context.Background(), query)
+	if err != nil {
+		return Movies{}, err
+	}
+
+	movies, err := pgx.CollectRows[Movie](rows, pgx.RowToStructByName)
+	if err != nil {
+		return Movies{}, err
+	}
+
+	return movies, err
+}

@@ -8,4 +8,5 @@ import (
 
 func CombineGroup(r *gin.Engine) {
 	r.GET("", controllers.GetUpcomingMovies)
+	r.GET("/movies", controllers.GetListMovies)
 }
