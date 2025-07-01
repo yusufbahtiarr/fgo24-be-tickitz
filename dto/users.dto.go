@@ -1,10 +1,12 @@
 package dto
 
-type CreateUserRequest struct {
-	ID        string  `json:"id"`
-	Email     string  `json:"email"`
-	Password  string  `json:"password"`
-	FirstName *string `json:"first_name"`
-	LastName  *string `json:"last_name"`
-	Phone     *string `json:"phone"`
+type RegisterUserRequest struct {
+	Email           string `json:"email" binding:"required"`
+	Password        string `json:"password" binding:"required,min=8"`
+	ConfirmPassword string `json:"confirm_password" binding:"required,eqfield=Password"`
+}
+
+type LoginUserRequest struct {
+	Email    string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
 }
