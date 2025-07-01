@@ -1,6 +1,6 @@
 -- STRUCTURE
 
-CREATE TYPE role_type AS ENUM ('Admin', 'User');
+CREATE TYPE role_type AS ENUM ('admin', 'user');
 CREATE TYPE status_payment_type AS ENUM('Paid', 'Not Paid');
 CREATE TYPE status_ticket_type AS ENUM ('In Active', 'Used');
 
@@ -8,40 +8,39 @@ CREATE TABLE users (
   id SERIAL PRIMARY KEY,
   email VARCHAR(100) NOT NULL UNIQUE,
   password VARCHAR(100) NOT NULL,
-  first_name VARCHAR(100),
-  last_name VARCHAR(100),
-  phone VARCHAR(15),
-  role role_type DEFAULT 'User'
-  created_at TIMESTAMP(0) DEFAULT now()
+  role role_type DEFAULT 'user',
+  created_at TIMESTAMP(0) DEFAULT now(),
   updated_at TIMESTAMP(0) DEFAULT now()
 );
 
-CREATE TABLE sessions (
+CREATE TABLE profile (
   id SERIAL PRIMARY KEY,
-  created_at TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  token TEXT NOT NULL UNIQUE,
-  is_active BOOLEAN DEFAULT TRUE,
-  id_user INT REFERENCES users(id) ON DELETE CASCADE
+  first_name VARCHAR(100),
+  last_name VARCHAR(100),
+  phone VARCHAR(15),
+  id_user INT REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMP(0) DEFAULT now(),
+  updated_at TIMESTAMP(0) DEFAULT now()
 );
 
 CREATE TABLE casts (
   id SERIAL PRIMARY KEY,
-  cast_name VARCHAR(100) NOT NULL
-  created_at TIMESTAMP(0) DEFAULT now()
+  cast_name VARCHAR(100) NOT NULL,
+  created_at TIMESTAMP(0) DEFAULT now(),
   updated_at TIMESTAMP(0) DEFAULT now()
 );
 
 CREATE TABLE genres (
   id SERIAL PRIMARY KEY,
-  genre_name VARCHAR(100) NOT NULL
-  created_at TIMESTAMP(0) DEFAULT now()
+  genre_name VARCHAR(100) NOT NULL,
+  created_at TIMESTAMP(0) DEFAULT now(),
   updated_at TIMESTAMP(0) DEFAULT now()
 );
 
 CREATE TABLE directors (
   id SERIAL PRIMARY KEY,
-  director_name VARCHAR(100) NOT NULL
-  created_at TIMESTAMP(0) DEFAULT now()
+  director_name VARCHAR(100) NOT NULL,
+  created_at TIMESTAMP(0) DEFAULT now(),
   updated_at TIMESTAMP(0) DEFAULT now()
 )
 
@@ -54,8 +53,8 @@ CREATE TABLE movies (
   runtime INT NOT NULL,
   overview TEXT NOT NULL,
   rating DECIMAL(3,1) NOT NULL,
-  id_director INT REFERENCES directors(id) ON UPDATE CASCADE ON DELETE SET NULL
-  created_at TIMESTAMP(0) DEFAULT now()
+  id_director INT REFERENCES directors(id) ON UPDATE CASCADE ON DELETE SET NULL,
+  created_at TIMESTAMP(0) DEFAULT now(),
   updated_at TIMESTAMP(0) DEFAULT now()
 );
 
