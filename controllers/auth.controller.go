@@ -6,8 +6,13 @@ import (
 	"fgo24-be-tickitz/utils"
 	"fmt"
 	"net/http"
+	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/joho/godotenv"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func RegisterUserHandler(ctx *gin.Context) {
@@ -63,4 +68,54 @@ func RegisterUserHandler(ctx *gin.Context) {
 		Results: reqUser.Email,
 	})
 
+}
+
+func LoginUserHandler(ctx *gin.Context) {
+	godotenv.Load()
+	secretKey := os.Getenv("APP_SECRET")
+	loginUser := dto.LoginUserRequest{}
+
+	if err := ctx.ShouldBindJSON(&loginUser); err != nil {
+		ctx.JSON(http.StatusBadRequest, utils.Response{
+			Success: false,
+			Message: "Invalid input",
+		})
+		return
+	}
+
+	user, err := models.FindUserByEmail(loginUser.Email)
+	if err != nil {
+		fmt.Println(user)
+		ctx.JSON(http.StatusNotFound, utils.Response{
+			Success: false,
+			Message: "User with specified email not found",
+		})
+		return
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(loginUser.Password))
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, utils.Response{ // Bisa juga http.StatusUnauthorized
+			Success: false,
+			Message: "Invalid email or password",
+		})
+		return
+	}
+
+	generatedToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"userId": user.ID,
+		"role":   user.Role,
+		"iat":    time.Now().Unix(),
+		"exp":    time.Now().Add(1 * time.Hour).Unix(),
+	})
+
+	token, _ := generatedToken.SignedString([]byte(secretKey))
+
+	ctx.JSON(http.StatusOK, utils.Response{
+		Success: true,
+		Message: "Success Login.",
+		Results: map[string]string{
+			"token": token,
+		},
+	})
 }
