@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx"
 )
 
 func GetUpcomingMovies(ctx *gin.Context) {
@@ -26,11 +27,19 @@ func GetUpcomingMovies(ctx *gin.Context) {
 }
 
 func GetListMovies(ctx *gin.Context) {
-	movies, err := models.FindListMovies()
+	searchTitle := ctx.Query("search")
+	movies, err := models.FindListMovies(searchTitle)
 	if err != nil {
+		if err == pgx.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, utils.Response{
+				Success: false,
+				Message: "no movies matching the search criteria",
+			})
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, utils.Response{
 			Success: false,
-			Message: "Internal server error",
+			Message: "Failed to search movies by title",
 			Errors:  err.Error(),
 		})
 	}

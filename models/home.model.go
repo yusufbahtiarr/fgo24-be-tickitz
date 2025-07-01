@@ -28,15 +28,17 @@ func FindUpcomingMovies() (Movies, error) {
 	return movies, err
 }
 
-func FindListMovies() (Movies, error) {
+func FindListMovies(title string) (Movies, error) {
 	conn, err := db.ConnectDB()
 	if err != nil {
 		return Movies{}, err
 	}
 	defer conn.Close()
 
-	query := "SELECT id, poster_url, backdrop_url, title, release_date, runtime, overview, rating, id_director FROM movies"
-	rows, err := conn.Query(context.Background(), query)
+	search := "%" + title + "%"
+
+	query := "SELECT id, poster_url, backdrop_url, title, release_date, runtime, overview, rating, id_director FROM movies WHERE title ILIKE $1"
+	rows, err := conn.Query(context.Background(), query, search)
 	if err != nil {
 		return Movies{}, err
 	}
