@@ -15,6 +15,17 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// @Summary      Register User
+// @Description  Register a new user with email and password
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        user  body      dto.RegisterUserRequest  true  "User Registration Input"
+// @Success      200   {object}  utils.Response
+// @Failure      400   {object}  utils.Response
+// @Failure      409   {object}  utils.Response
+// @Failure      500   {object}  utils.Response
+// @Router       /auth/register [post]
 func RegisterUserHandler(ctx *gin.Context) {
 	reqUser := dto.RegisterUserRequest{}
 	if err := ctx.ShouldBindJSON(&reqUser); err != nil {
@@ -70,6 +81,17 @@ func RegisterUserHandler(ctx *gin.Context) {
 
 }
 
+// @Summary      Login User
+// @Description  Authenticate user with email and password, and return JWT token
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        user  body      dto.LoginUserRequest  true  "User login credentials"
+// @Success      200   {object}  utils.Response
+// @Failure      400   {object}  utils.Response
+// @Failure      404   {object}  utils.Response
+// @Failure      401   {object}  utils.Response
+// @Router       /auth/login [post]
 func LoginUserHandler(ctx *gin.Context) {
 	godotenv.Load()
 	secretKey := os.Getenv("APP_SECRET")
