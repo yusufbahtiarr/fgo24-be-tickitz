@@ -1,5 +1,45 @@
 basePath: /
 definitions:
+  dto.CreateMovieRequest:
+    properties:
+      backdrop_url:
+        type: string
+      casts:
+        items:
+          type: integer
+        type: array
+      directors:
+        items:
+          type: integer
+        type: array
+      genres:
+        items:
+          type: integer
+        type: array
+      overview:
+        type: string
+      poster_url:
+        type: string
+      rating:
+        type: number
+      release_date:
+        type: string
+      runtime:
+        type: integer
+      title:
+        type: string
+    required:
+    - backdrop_url
+    - casts
+    - directors
+    - genres
+    - overview
+    - poster_url
+    - rating
+    - release_date
+    - runtime
+    - title
+    type: object
   dto.ForgotPasswordRequest:
     properties:
       email:
@@ -102,6 +142,38 @@ info:
   title: Tickitz - Booking Ticket App
   version: "1.0"
 paths:
+  /admins/movies:
+    post:
+      consumes:
+      - application/json
+      description: Create movie with genre, cast, and director
+      parameters:
+      - description: Movie payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateMovieRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Create new movie
+      tags:
+      - Admins
   /auth/forgot-password:
     post:
       consumes:

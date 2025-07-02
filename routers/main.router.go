@@ -10,6 +10,7 @@ import (
 )
 
 func CombineGroup(r *gin.Engine) {
+	adminRouter(r.Group("/admins"))
 	authRouter(r.Group("/auth"))
 	userRouter(r.Group("/users"))
 	movieRouter(r.Group("/movies"))
