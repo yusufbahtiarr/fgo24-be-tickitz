@@ -38,7 +38,7 @@ func RegisterUser(reqUser dto.RegisterUserRequest) error {
 		}
 	}()
 
-	queryProfile := `INSERT INTO profile (fullname,created_at, updated_at) VALUES (now(), now()) RETURNING id`
+	queryProfile := `INSERT INTO profile (created_at, updated_at) VALUES (now(), now()) RETURNING id`
 	var profileID int
 	err = trx.QueryRow(ctx, queryProfile).Scan(&profileID)
 	if err != nil {
