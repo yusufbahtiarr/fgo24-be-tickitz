@@ -5,7 +5,10 @@ import (
 	"fgo24-be-tickitz/db"
 	"fgo24-be-tickitz/dto"
 	"fmt"
+	"os"
+	"strconv"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"golang.org/x/crypto/bcrypt"
@@ -106,8 +109,42 @@ func ResetPassword(id int, newData dto.ResetPasswordRequest) error {
 		return fmt.Errorf("failed to hash password")
 	}
 
-	_, err = conn.Exec(context.Background(), `UPDATE users set password = $1 where id=$2`, hashedPassword, id)
+	_, err = conn.Exec(context.Background(), `UPDATE users set password = $1, updated_at = now() where id=$2`, hashedPassword, id)
 
 	return err
+}
 
+func VerifyResetPasswordToken(tokenString string) (int, error) {
+	secretKey := os.Getenv("APP_SECRET")
+	if secretKey == "" {
+		return 0, fmt.Errorf("missing APP_SECRET")
+	}
+
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method")
+		}
+		return []byte(secretKey), nil
+	})
+
+	if err != nil || !token.Valid {
+		return 0, fmt.Errorf("invalid or expired token")
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok || claims["purpose"] != "reset_password" {
+		return 0, fmt.Errorf("invalid token purpose")
+	}
+
+	userIDStr, ok := claims["userId"].(string)
+	if !ok {
+		return 0, fmt.Errorf("invalid user ID in token")
+	}
+
+	userID, err := strconv.Atoi(userIDStr)
+	if err != nil {
+		return 0, fmt.Errorf("invalid user ID format")
+	}
+
+	return userID, nil
 }

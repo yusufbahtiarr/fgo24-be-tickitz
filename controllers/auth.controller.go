@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -185,15 +184,6 @@ func ForgotPasswordHandler(ctx *gin.Context) {
 // @Failure      404    {object}  utils.Response
 // @Router       /auth/reset-password/{token} [post]
 func ResetPasswordHandler(ctx *gin.Context) {
-	secretKey := os.Getenv("APP_SECRET")
-	if secretKey == "" {
-		ctx.JSON(http.StatusInternalServerError, utils.Response{
-			Success: false,
-			Message: "Server configuration error",
-		})
-		return
-	}
-
 	token := ctx.Param("token")
 	resPassword := dto.ResetPasswordRequest{}
 
@@ -202,46 +192,14 @@ func ResetPasswordHandler(ctx *gin.Context) {
 			Success: false,
 			Message: "Invalid Request",
 		})
-	}
-
-	checkToken, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method")
-		}
-		return []byte(secretKey), nil
-	})
-
-	if err != nil || !checkToken.Valid {
-		ctx.JSON(http.StatusUnauthorized, utils.Response{
-			Success: false,
-			Message: "Invalid or expired token",
-		})
 		return
 	}
 
-	claims, ok := checkToken.Claims.(jwt.MapClaims)
-	if !ok || claims["purpose"] != "reset_password" {
-		ctx.JSON(http.StatusUnauthorized, utils.Response{
-			Success: false,
-			Message: "Invalid token purpose",
-		})
-		return
-	}
-
-	userIDStr, ok := claims["userId"].(string)
-	if !ok {
-		ctx.JSON(http.StatusUnauthorized, utils.Response{
-			Success: false,
-			Message: "Invalid user ID",
-		})
-		return
-	}
-
-	userID, err := strconv.Atoi(userIDStr)
+	userID, err := models.VerifyResetPasswordToken(token)
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, utils.Response{
 			Success: false,
-			Message: "Invalid user ID format",
+			Message: err.Error(),
 		})
 		return
 	}
@@ -260,7 +218,9 @@ func ResetPasswordHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, utils.Response{
 			Success: false,
 			Message: "Failed to reset password.",
+			Errors:  err.Error(),
 		})
+		return
 	}
 
 	ctx.JSON(http.StatusOK, utils.Response{
