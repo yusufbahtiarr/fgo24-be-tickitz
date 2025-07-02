@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -158,7 +159,6 @@ func ForgotPasswordHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, utils.Response{
 			Success: false,
 			Message: "Email not found",
-			Errors:  err.Error(),
 		})
 		return
 	}
@@ -169,6 +169,104 @@ func ForgotPasswordHandler(ctx *gin.Context) {
 		Success: true,
 		Message: "Forgot Password Success",
 		Results: token,
+	})
+}
+
+// @Summary      Reset Password
+// @Description  Reset user password using a valid reset token
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        token  path      string                     true  "Reset token"
+// @Param        body   body      dto.ResetPasswordRequest   true  "New password data"
+// @Success      200    {object}  utils.Response
+// @Failure      400    {object}  utils.Response
+// @Failure      401    {object}  utils.Response
+// @Failure      404    {object}  utils.Response
+// @Router       /auth/reset-password/{token} [post]
+func ResetPasswordHandler(ctx *gin.Context) {
+	secretKey := os.Getenv("APP_SECRET")
+	if secretKey == "" {
+		ctx.JSON(http.StatusInternalServerError, utils.Response{
+			Success: false,
+			Message: "Server configuration error",
+		})
+		return
+	}
+
+	token := ctx.Param("token")
+	resPassword := dto.ResetPasswordRequest{}
+
+	if err := ctx.ShouldBindJSON(&resPassword); err != nil {
+		ctx.JSON(http.StatusBadRequest, utils.Response{
+			Success: false,
+			Message: "Invalid Request",
+		})
+	}
+
+	checkToken, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method")
+		}
+		return []byte(secretKey), nil
+	})
+
+	if err != nil || !checkToken.Valid {
+		ctx.JSON(http.StatusUnauthorized, utils.Response{
+			Success: false,
+			Message: "Invalid or expired token",
+		})
+		return
+	}
+
+	claims, ok := checkToken.Claims.(jwt.MapClaims)
+	if !ok || claims["purpose"] != "reset_password" {
+		ctx.JSON(http.StatusUnauthorized, utils.Response{
+			Success: false,
+			Message: "Invalid token purpose",
+		})
+		return
+	}
+
+	userIDStr, ok := claims["userId"].(string)
+	if !ok {
+		ctx.JSON(http.StatusUnauthorized, utils.Response{
+			Success: false,
+			Message: "Invalid user ID",
+		})
+		return
+	}
+
+	userID, err := strconv.Atoi(userIDStr)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, utils.Response{
+			Success: false,
+			Message: "Invalid user ID format",
+		})
+		return
+	}
+
+	user, err := models.FindUserByID(userID)
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, utils.Response{
+			Success: false,
+			Message: "User not found",
+		})
+		return
+	}
+
+	err = models.ResetPassword(userID, resPassword)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, utils.Response{
+			Success: false,
+			Message: "Failed to reset password.",
+		})
+	}
+
+	ctx.JSON(http.StatusOK, utils.Response{
+		Success: true,
+		Message: "Reset Password Success",
+		Results: user.Email,
 	})
 }
 
@@ -191,7 +289,7 @@ func GeneratedResetPasswordToken(user models.User) string {
 	generatedToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userId":  user.ID,
 		"purpose": "reset_password",
-		"exp":     time.Now().Add(5 * time.Minute).Unix(),
+		"exp":     time.Now().Add(10 * time.Minute).Unix(),
 	})
 
 	token, _ := generatedToken.SignedString([]byte(secretKey))

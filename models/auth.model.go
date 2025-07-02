@@ -85,3 +85,29 @@ func CheckUserExistsByEmail(email string) (bool, error) {
 
 	return true, nil
 }
+
+func ResetPassword(id int, newData dto.ResetPasswordRequest) error {
+	conn, err := db.ConnectDB()
+	if err != nil {
+		return fmt.Errorf("failed to connect to database")
+	}
+	defer conn.Close()
+
+	if newData.Password == "" && newData.ConfirmPassword == "" {
+		return fmt.Errorf("input password cannot be empty")
+	}
+
+	if newData.Password != newData.ConfirmPassword {
+		return fmt.Errorf("password and confirm password do not match")
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newData.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return fmt.Errorf("failed to hash password")
+	}
+
+	_, err = conn.Exec(context.Background(), `UPDATE users set password = $1 where id=$2`, hashedPassword, id)
+
+	return err
+
+}

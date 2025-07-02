@@ -35,3 +35,25 @@ func FindUserByEmail(email string) (User, error) {
 
 	return user, err
 }
+
+func FindUserByID(id int) (User, error) {
+	conn, err := db.ConnectDB()
+	if err != nil {
+		return User{}, err
+	}
+	defer conn.Close()
+
+	query := `SELECT id, email, password, role FROM users WHERE id = $1`
+	rows, err := conn.Query(context.Background(), query, id)
+	if err != nil {
+		return User{}, err
+	}
+	defer rows.Close()
+
+	user, err := pgx.CollectOneRow[User](rows, pgx.RowToStructByName)
+	if err != nil {
+		return User{}, err
+	}
+
+	return user, err
+}

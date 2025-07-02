@@ -31,6 +31,17 @@ definitions:
     - email
     - password
     type: object
+  dto.ResetPasswordRequest:
+    properties:
+      confirm_password:
+        type: string
+      password:
+        minLength: 8
+        type: string
+    required:
+    - confirm_password
+    - password
+    type: object
   models.Movie:
     properties:
       backdrop_url:
@@ -199,6 +210,45 @@ paths:
           schema:
             $ref: '#/definitions/utils.Response'
       summary: Register User
+      tags:
+      - Auth
+  /auth/reset-password/{token}:
+    post:
+      consumes:
+      - application/json
+      description: Reset user password using a valid reset token
+      parameters:
+      - description: Reset token
+        in: path
+        name: token
+        required: true
+        type: string
+      - description: New password data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ResetPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Reset Password
       tags:
       - Auth
   /buy-ticket/{id}:
