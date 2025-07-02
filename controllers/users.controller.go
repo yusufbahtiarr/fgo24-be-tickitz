@@ -4,7 +4,6 @@ import (
 	"fgo24-be-tickitz/models"
 	"fgo24-be-tickitz/utils"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,28 +18,35 @@ import (
 // @Security     BearerAuth
 // @Router       /users/profile [get]
 func GetUserProfileHandler(ctx *gin.Context) {
-	userIdx, _ := ctx.Get("userId")
-	role, _ := ctx.Get("role")
-	userIds := userIdx.(string)
+	userIdx, exists := ctx.Get("userId")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, utils.Response{
+			Success: false,
+			Message: "Unauthorized: No user ID found in token",
+		})
+		return
+	}
 
-	if role != "user" {
+	role, _ := ctx.Get("role")
+
+	roleStr, ok := role.(string)
+	if !ok || roleStr != "user" {
 		ctx.JSON(http.StatusForbidden, utils.Response{
 			Success: false,
 			Message: "Forbidden: Access is allowed for 'user' role only",
 		})
-		ctx.Abort()
 		return
 	}
 
-	userId, err := strconv.Atoi(userIds)
-	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, utils.Response{
+	userIdFloat, ok := userIdx.(float64)
+	if !ok {
+		ctx.JSON(http.StatusInternalServerError, utils.Response{
 			Success: false,
-			Message: "Invalid user ID format",
+			Message: "Failed to convert user ID",
 		})
-		ctx.Abort()
 		return
 	}
+	userId := int(userIdFloat)
 
 	// fmt.Printf("User yang sedang login adalah user dengan id %d dengan role %s\n", userId, role)
 
