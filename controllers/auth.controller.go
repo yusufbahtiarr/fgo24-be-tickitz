@@ -127,7 +127,7 @@ func LoginUserHandler(ctx *gin.Context) {
 		Success: true,
 		Message: "Success Login.",
 		Results: map[string]string{
-			"token": token,
+			"token": "Bearer " + token,
 		},
 	})
 }
@@ -167,7 +167,9 @@ func ForgotPasswordHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, utils.Response{
 		Success: true,
 		Message: "Forgot Password Success",
-		Results: token,
+		Results: map[string]string{
+			"token": token,
+		},
 	})
 }
 

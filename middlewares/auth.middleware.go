@@ -8,14 +8,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/joho/godotenv"
 )
 
 func VerifyToken() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		godotenv.Load()
 		secretKey := os.Getenv("APP_SECRET")
-		token := strings.Split(ctx.GetHeader("Authorization"), "Bearer")
+		token := strings.Split(ctx.GetHeader("Authorization"), "Bearer ")
 
 		if len(token) < 2 {
 			ctx.JSON(http.StatusUnauthorized, utils.Response{
@@ -30,17 +28,19 @@ func VerifyToken() gin.HandlerFunc {
 			return []byte(secretKey), nil
 		})
 
-		if err != nil {
+		if err != nil || !rawToken.Valid {
 			ctx.JSON(http.StatusUnauthorized, utils.Response{
 				Success: false,
-				Message: "Invalid token",
+				Message: "Invalid or expired token",
 			})
 			ctx.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
 
 		userId := rawToken.Claims.(jwt.MapClaims)["userId"]
+		role := rawToken.Claims.(jwt.MapClaims)["role"]
 		ctx.Set("userId", userId)
+		ctx.Set("role", role)
 		ctx.Next()
 	}
 }

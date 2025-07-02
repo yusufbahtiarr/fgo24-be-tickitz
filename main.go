@@ -13,6 +13,10 @@ import (
 // @Description	API Documentation Booking Ticket Application
 // @BasePath /
 
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+
 func main() {
 	r := gin.Default()
 	godotenv.Load()

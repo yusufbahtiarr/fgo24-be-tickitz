@@ -12,6 +12,7 @@ import (
 
 func CombineGroup(r *gin.Engine) {
 	authRouter(r.Group("/auth"))
+	userRouter(r.Group("/users"))
 	r.GET("", controllers.GetUpcomingMovies)
 	r.GET("/movies", controllers.GetListMovies)
 	r.GET("/buy-ticket/:id", controllers.GetMovieByID)
