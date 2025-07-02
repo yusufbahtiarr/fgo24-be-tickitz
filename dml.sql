@@ -11,18 +11,18 @@ VALUES
 ('cyntia agustin', '089474567456'),
 ('caca lunar', '089235346345');
 
-INSERT INTO users (email, password, role)
+INSERT INTO users (email, password, role, id_profile)
 VALUES
-('yusuf@mail.com','7b21848ac9af35be0ddb2d6b9fc3851934db8420','admin'),
-('handi@mail.com','1a9b9508b6003b68ddfe03a9c8cbc4bd4388339b','admin'),
-('gandi@mail.com','403d9917c3e950798601addf7ba82cd3c83f344b','user'),
-('rian@mail.com','3e511da7577d1864871b760ab30e05b56943c9b2','user'),
-('thomas@mail.com','69df79bef9287d3bcb8f104a408b06de6a108fd8','user'),
-('fani@mail.com','62a013722e0619aef2edee368768cd07b6529655','user'),
-('rani@mail.com','d559965849921585c1849af03b7a51638700d979','user'),
-('bagas@mail.com','9eab102e8f9431bb23016851d11e658e0b20b730','user'),
-('cyntia@mail.com','a045b7efa463c6ed195c644163f4168952fbd34a','user'),
-('caca@mail.com','6934105ad50010b814c933314b1da6841431bc8b','user');
+('yusuf@mail.com','7b21848ac9af35be0ddb2d6b9fc3851934db8420','admin',1),
+('handi@mail.com','1a9b9508b6003b68ddfe03a9c8cbc4bd4388339b','admin',2),
+('gandi@mail.com','403d9917c3e950798601addf7ba82cd3c83f344b','user',3),
+('rian@mail.com','3e511da7577d1864871b760ab30e05b56943c9b2','user',4),
+('thomas@mail.com','69df79bef9287d3bcb8f104a408b06de6a108fd8','user',5),
+('fani@mail.com','62a013722e0619aef2edee368768cd07b6529655','user',6),
+('rani@mail.com','d559965849921585c1849af03b7a51638700d979','user',7),
+('bagas@mail.com','9eab102e8f9431bb23016851d11e658e0b20b730','user',8),
+('cyntia@mail.com','a045b7efa463c6ed195c644163f4168952fbd34a','user',9),
+('caca@mail.com','6934105ad50010b814c933314b1da6841431bc8b','user',10);
 
 
 INSERT INTO casts (cast_name)
