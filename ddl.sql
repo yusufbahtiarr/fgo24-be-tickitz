@@ -41,7 +41,7 @@ CREATE TABLE directors (
   director_name VARCHAR(100) NOT NULL,
   created_at TIMESTAMP(0) DEFAULT now(),
   updated_at TIMESTAMP(0) DEFAULT now()
-)
+);
 
 CREATE TABLE movies (
   id SERIAL PRIMARY KEY,
@@ -105,8 +105,8 @@ CREATE TABLE transactions (
   total_payment INT NOT NULL,
   transaction_date TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   movie_date DATE NOT NULL,
-  status_payment status_payment_type DEFAULT 'Not Paid',
-  status_ticket status_ticket_type DEFAULT 'In Active',
+  status_payment status_payment_type DEFAULT 'not paid',
+  status_ticket status_ticket_type DEFAULT 'in active',
   id_movie INT REFERENCES movies(id),
   id_cinema INT REFERENCES cinemas(id),
   id_time INT REFERENCES times(id),
