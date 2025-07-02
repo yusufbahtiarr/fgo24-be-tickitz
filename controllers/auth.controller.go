@@ -132,6 +132,46 @@ func LoginUserHandler(ctx *gin.Context) {
 	})
 }
 
+// @Summary      Forgot Password
+// @Description  Request password reset by verifying email and returning reset token
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        email  body      dto.ForgotPasswordRequest  true  "User email for password reset"
+// @Success      200    {object}  utils.Response
+// @Failure      400    {object}  utils.Response
+// @Failure      404    {object}  utils.Response
+// @Router       /auth/forgot-password [post]
+func ForgotPasswordHandler(ctx *gin.Context) {
+	forgotPassword := dto.ForgotPasswordRequest{}
+
+	if err := ctx.ShouldBindJSON(&forgotPassword); err != nil {
+		ctx.JSON(http.StatusBadRequest, utils.Response{
+			Success: false,
+			Message: "Invalid Input",
+		})
+		return
+	}
+
+	checkEmail, err := models.FindUserByEmail(forgotPassword.Email)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, utils.Response{
+			Success: false,
+			Message: "Email not found",
+			Errors:  err.Error(),
+		})
+		return
+	}
+
+	token := GeneratedResetPasswordToken(checkEmail)
+
+	ctx.JSON(http.StatusOK, utils.Response{
+		Success: true,
+		Message: "Forgot Password Success",
+		Results: token,
+	})
+}
+
 func GeneratedToken(user models.User) string {
 	secretKey := os.Getenv("APP_SECRET")
 	generatedToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
@@ -139,6 +179,19 @@ func GeneratedToken(user models.User) string {
 		"role":   user.Role,
 		"iat":    time.Now().Unix(),
 		"exp":    time.Now().Add(1 * time.Hour).Unix(),
+	})
+
+	token, _ := generatedToken.SignedString([]byte(secretKey))
+
+	return token
+}
+
+func GeneratedResetPasswordToken(user models.User) string {
+	secretKey := os.Getenv("APP_SECRET")
+	generatedToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"userId":  user.ID,
+		"purpose": "reset_password",
+		"exp":     time.Now().Add(5 * time.Minute).Unix(),
 	})
 
 	token, _ := generatedToken.SignedString([]byte(secretKey))

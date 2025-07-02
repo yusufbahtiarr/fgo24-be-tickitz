@@ -9,4 +9,5 @@ import (
 func authRouter(r *gin.RouterGroup) {
 	r.POST("/register", controllers.RegisterUserHandler)
 	r.POST("/login", controllers.LoginUserHandler)
+	r.POST("/forgot-password", controllers.ForgotPasswordHandler)
 }

@@ -1,5 +1,12 @@
 basePath: /
 definitions:
+  dto.ForgotPasswordRequest:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
   dto.LoginUserRequest:
     properties:
       email:
@@ -96,6 +103,36 @@ paths:
       summary: Get Upcoming Movies
       tags:
       - Movies
+  /auth/forgot-password:
+    post:
+      consumes:
+      - application/json
+      description: Request password reset by verifying email and returning reset token
+      parameters:
+      - description: User email for password reset
+        in: body
+        name: email
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ForgotPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Forgot Password
+      tags:
+      - Auth
   /auth/login:
     post:
       consumes:
