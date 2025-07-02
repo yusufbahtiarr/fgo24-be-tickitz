@@ -201,6 +201,25 @@ VALUES
 (10, 2),
 (10, 6);
 
+INSERT INTO movie_directors(id_movie, id_director)
+VALUES
+(1, 3),
+(1, 6),
+(2, 5),
+(3, 10),
+(3, 1),
+(4, 7),
+(5, 8),
+(6, 10),
+(6, 9),
+(7, 5),
+(8, 7),
+(8, 5),
+(9, 8),
+(9, 7),
+(10, 8),
+(10, 6);
+
 INSERT INTO transactions (name, email, phone, virtual_account, total_payment, movie_date, id_movie, id_cinema, id_time, id_location, id_payment_method, id_user)
 VALUES
 ('Yusuf Bahtiar', 'yusuf@mail.com', '089533452345', '089735324534563456456345', 180000, '2025-06-24', 1, 2, 1, 1, 6, 1),
