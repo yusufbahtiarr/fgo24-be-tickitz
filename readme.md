@@ -17,7 +17,8 @@ This WeeklyTask Project, presents an Entity-Relationship Diagram (ERD) for an Ku
   movies ||--o{ transactions : featured
   movie_casts }o--||  movies  : has
   casts ||--o{ movie_casts : acts
-  directors }o--|| movies : directed
+  directors ||--o{ movie_directors : directed
+  movie_directors }o--||  movies  : has
 
 
   users {
@@ -59,9 +60,7 @@ This WeeklyTask Project, presents an Entity-Relationship Diagram (ERD) for an Ku
   movie_casts {
     int movie_id FK
     int cast_id FK
-    timestamp created_at
-    timestamp updated_at
-}
+  }
   casts {
     int id PK
     string cast_name
@@ -73,6 +72,10 @@ This WeeklyTask Project, presents an Entity-Relationship Diagram (ERD) for an Ku
     string director_name
     timestamp created_at
     timestamp updated_at
+  }
+  movie_directors {
+    int movie_id FK
+    int director_id FK
   }
 
   genres {
