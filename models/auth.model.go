@@ -38,20 +38,21 @@ func RegisterUser(reqUser dto.RegisterUserRequest) error {
 		}
 	}()
 
-	queryUser := `INSERT INTO users (email, password) VALUES ($1, $2) RETURNING id`
+	queryProfile := `INSERT INTO profile (fullname,created_at, updated_at) VALUES (now(), now()) RETURNING id`
+	var profileID int
+	err = trx.QueryRow(ctx, queryProfile).Scan(&profileID)
+	if err != nil {
+		return fmt.Errorf("failed to insert profile into profile table")
+	}
+
+	queryUser := `INSERT INTO users (email, password, id_profile) VALUES ($1, $2, $3) RETURNING id`
 	var userID int
-	err = trx.QueryRow(ctx, queryUser, reqUser.Email, hashedPassword).Scan(&userID)
+	err = trx.QueryRow(ctx, queryUser, reqUser.Email, hashedPassword, profileID).Scan(&userID)
 	if err != nil {
 		if pgErr, ok := err.(*pgconn.PgError); ok && pgErr.Code == "23505" {
 			return fmt.Errorf("email '%s' is already registered", reqUser.Email)
 		}
 		return fmt.Errorf("failed to insert user into users table")
-	}
-
-	queryProfille := `INSERT INTO profile (id_user) VALUES ($1)`
-	_, err = trx.Exec(ctx, queryProfille, userID)
-	if err != nil {
-		return fmt.Errorf("failed to insert user profile into profile table")
 	}
 
 	err = trx.Commit(ctx)
