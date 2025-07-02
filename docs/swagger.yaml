@@ -102,27 +102,6 @@ info:
   title: Tickitz - Booking Ticket App
   version: "1.0"
 paths:
-  /:
-    get:
-      consumes:
-      - application/json
-      description: Retrieve a list of upcoming movies
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.UpcomingMovie'
-            type: array
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/utils.Response'
-      summary: Get Upcoming Movies
-      tags:
-      - Movies
   /auth/forgot-password:
     post:
       consumes:
@@ -260,31 +239,6 @@ paths:
       summary: Reset Password
       tags:
       - Auth
-  /buy-ticket/{id}:
-    get:
-      consumes:
-      - application/json
-      description: Get movie detail by movie ID
-      parameters:
-      - description: Movie ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Movie'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/utils.Response'
-      summary: Get Movie By ID
-      tags:
-      - Movies
   /movies:
     get:
       consumes:
@@ -311,6 +265,52 @@ paths:
           schema:
             $ref: '#/definitions/utils.Response'
       summary: List Movies
+      tags:
+      - Movies
+  /movies/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get movie detail by movie ID
+      parameters:
+      - description: Movie ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Movie'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Get Movie By ID
+      tags:
+      - Movies
+  /movies/upcoming:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of upcoming movies
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.UpcomingMovie'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Get Upcoming Movies
       tags:
       - Movies
   /users/profile:

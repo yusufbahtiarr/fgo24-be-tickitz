@@ -17,6 +17,20 @@ type UpcomingMovie struct {
 	Rating      float32   `json:"rating"`
 }
 
+type Movie struct {
+	ID          int       `json:"id"`
+	PosterURL   string    `json:"poster_url"`
+	BackdropURL string    `json:"backdrop_url"`
+	Title       string    `json:"title"`
+	ReleaseDate time.Time `json:"release_date"`
+	Runtime     int       `json:"runtime"`
+	Overview    string    `json:"overview"`
+	Rating      float32   `json:"rating"`
+	IDDirector  int       `json:"id_director"`
+}
+
+type Movies []Movie
+
 func FindUpcomingMovies() ([]UpcomingMovie, error) {
 	conn, err := db.ConnectDB()
 	if err != nil {
@@ -24,7 +38,6 @@ func FindUpcomingMovies() ([]UpcomingMovie, error) {
 	}
 	defer conn.Close()
 
-	// query := "SELECT id, poster_url, backdrop_url, title, release_date, runtime, overview, rating, id_director FROM movies ORDER BY release_date DESC"
 	query2 := `SELECT m.id, m.poster_url, m.title, m.release_date,
   ( SELECT STRING_AGG(g.genre_name, ', ') 
     FROM movie_genres mg

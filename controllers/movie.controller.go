@@ -17,7 +17,7 @@ import (
 // @Produce      json
 // @Success      200  {array}   models.UpcomingMovie
 // @Failure      500  {object}  utils.Response
-// @Router       / [get]
+// @Router       /movies/upcoming [get]
 func GetUpcomingMovies(ctx *gin.Context) {
 	movies, err := models.FindUpcomingMovies()
 	if err != nil {
@@ -77,7 +77,7 @@ func GetListMovies(ctx *gin.Context) {
 // @Param        id   path      int  true  "Movie ID"
 // @Success      200  {object}  models.Movie
 // @Failure      404  {object}  utils.Response
-// @Router       /buy-ticket/{id} [get]
+// @Router       /movies/{id} [get]
 func GetMovieByID(ctx *gin.Context) {
 	idx := ctx.Param("id")
 	id, err := strconv.Atoi(idx)
