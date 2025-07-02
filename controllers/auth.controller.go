@@ -11,7 +11,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/joho/godotenv"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -93,8 +92,6 @@ func RegisterUserHandler(ctx *gin.Context) {
 // @Failure      401   {object}  utils.Response
 // @Router       /auth/login [post]
 func LoginUserHandler(ctx *gin.Context) {
-	godotenv.Load()
-	secretKey := os.Getenv("APP_SECRET")
 	loginUser := dto.LoginUserRequest{}
 
 	if err := ctx.ShouldBindJSON(&loginUser); err != nil {
@@ -124,6 +121,19 @@ func LoginUserHandler(ctx *gin.Context) {
 		return
 	}
 
+	token := GeneratedToken(user)
+
+	ctx.JSON(http.StatusOK, utils.Response{
+		Success: true,
+		Message: "Success Login.",
+		Results: map[string]string{
+			"token": token,
+		},
+	})
+}
+
+func GeneratedToken(user models.User) string {
+	secretKey := os.Getenv("APP_SECRET")
 	generatedToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userId": user.ID,
 		"role":   user.Role,
@@ -133,11 +143,5 @@ func LoginUserHandler(ctx *gin.Context) {
 
 	token, _ := generatedToken.SignedString([]byte(secretKey))
 
-	ctx.JSON(http.StatusOK, utils.Response{
-		Success: true,
-		Message: "Success Login.",
-		Results: map[string]string{
-			"token": token,
-		},
-	})
+	return token
 }
