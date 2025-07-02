@@ -1,0 +1,1 @@
+CREATE TYPE status_payment_type AS ENUM('paid', 'not paid');

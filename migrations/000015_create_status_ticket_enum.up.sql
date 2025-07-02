@@ -1,0 +1,1 @@
+CREATE TYPE status_ticket_type AS ENUM ('in active', 'used');
