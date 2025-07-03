@@ -97,27 +97,41 @@ func GetNowShowingMovies() ([]NowShowingMovie, error) {
 	return movies, err
 }
 
-func GetListMovies(title string) (Movies, error) {
+func GetListMovies(title string, limit, offset int) (Movies, int, error) {
 	conn, err := db.ConnectDB()
 	if err != nil {
-		return Movies{}, err
+		return Movies{}, 0, err
 	}
 	defer conn.Close()
 
 	search := "%" + title + "%"
 
-	query := "SELECT id, poster_url, backdrop_url, title, release_date, runtime, overview, rating FROM movies WHERE title ILIKE $1"
-	rows, err := conn.Query(context.Background(), query, search)
+	query := `
+		SELECT id, poster_url, backdrop_url, title, release_date, runtime, overview, rating
+		FROM movies
+		WHERE title ILIKE $1
+		ORDER BY title
+		LIMIT $2 OFFSET $3
+	`
+	rows, err := conn.Query(context.Background(), query, search, limit, offset)
 	if err != nil {
-		return Movies{}, err
+		return Movies{}, 0, err
 	}
+	defer rows.Close()
 
 	movies, err := pgx.CollectRows[Movie](rows, pgx.RowToStructByName)
 	if err != nil {
-		return Movies{}, err
+		return Movies{}, 0, err
 	}
 
-	return movies, err
+	Count := `SELECT COUNT(*)	FROM movies	WHERE title ILIKE $1	`
+	var totalMovies int
+	err = conn.QueryRow(context.Background(), Count, search).Scan(&totalMovies)
+	if err != nil {
+		return Movies{}, 0, err
+	}
+
+	return movies, totalMovies, nil
 }
 
 func GetMovieByID(id int) (Movie, error) {
@@ -138,5 +152,5 @@ func GetMovieByID(id int) (Movie, error) {
 		return Movie{}, err
 	}
 
-	return movie, err
+	return movie, nil
 }

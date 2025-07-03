@@ -216,11 +216,24 @@ definitions:
       phone:
         type: string
     type: object
+  utils.PageInfo:
+    properties:
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
   utils.Response:
     properties:
       errors: {}
       message:
         type: string
+      page_info:
+        $ref: '#/definitions/utils.PageInfo'
       results: {}
       success:
         type: boolean
@@ -561,23 +574,44 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get list of movies with optional search by title
+      description: Get list of movies with optional search by title and pagination
       parameters:
       - description: Search by movie title
         in: query
         name: search
         type: string
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Items per page (5)
+        in: query
+        name: limit
+        type: integer
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            items:
-              items:
-                $ref: '#/definitions/models.Movie'
-              type: array
-            type: array
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                page_info:
+                  $ref: '#/definitions/utils.PageInfo'
+                results:
+                  items:
+                    $ref: '#/definitions/models.Movie'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.Response'
         "500":
           description: Internal Server Error
           schema:

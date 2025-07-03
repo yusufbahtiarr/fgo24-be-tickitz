@@ -530,7 +530,7 @@ const docTemplate = `{
         },
         "/movies": {
             "get": {
-                "description": "Get list of movies with optional search by title",
+                "description": "Get list of movies with optional search by title and pagination",
                 "consumes": [
                     "application/json"
                 ],
@@ -547,19 +547,55 @@ const docTemplate = `{
                         "description": "Search by movie title",
                         "name": "search",
                         "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page (5)",
+                        "name": "limit",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "array",
-                                "items": {
-                                    "$ref": "#/definitions/models.Movie"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "page_info": {
+                                            "$ref": "#/definitions/utils.PageInfo"
+                                        },
+                                        "results": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/models.Movie"
+                                            }
+                                        }
+                                    }
                                 }
-                            }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
                         }
                     },
                     "500": {
@@ -1096,12 +1132,32 @@ const docTemplate = `{
                 }
             }
         },
+        "utils.PageInfo": {
+            "type": "object",
+            "properties": {
+                "limit": {
+                    "type": "integer"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "total_pages": {
+                    "type": "integer"
+                }
+            }
+        },
         "utils.Response": {
             "type": "object",
             "properties": {
                 "errors": {},
                 "message": {
                     "type": "string"
+                },
+                "page_info": {
+                    "$ref": "#/definitions/utils.PageInfo"
                 },
                 "results": {},
                 "success": {

@@ -61,17 +61,44 @@ func GetNowShowingMoviesHandler(ctx *gin.Context) {
 }
 
 // @Summary      List Movies
-// @Description  Get list of movies with optional search by title
+// @Description  Get list of movies with optional search by title and pagination
 // @Tags         Movies
 // @Accept       json
 // @Produce      json
-// @Param        search  query     string  false  "Search by movie title"
-// @Success      200     {array}  models.Movies
-// @Failure      500     {object}  utils.Response
+// @Param        search query    string  false  "Search by movie title"
+// @Param        page   query    int     false  "Page"
+// @Param        limit  query    int     false  "Items per page (5)"
+// @Success      200    {object} utils.Response{results=[]models.Movie,page_info=utils.PageInfo}
+// @Failure      400    {object} utils.Response
+// @Failure      404    {object} utils.Response
+// @Failure      500    {object} utils.Response
 // @Router       /movies [get]
 func GetListMoviesHandler(ctx *gin.Context) {
 	searchTitle := ctx.Query("search")
-	movies, err := models.GetListMovies(searchTitle)
+	pageX := ctx.DefaultQuery("page", "1")
+	limitX := ctx.DefaultQuery("limit", "5")
+
+	page, err := strconv.Atoi(pageX)
+	if err != nil || page < 1 {
+		ctx.JSON(http.StatusBadRequest, utils.Response{
+			Success: false,
+			Message: "Invalid page number. Page must be a positive integer.",
+		})
+		return
+	}
+
+	limit, err := strconv.Atoi(limitX)
+	if err != nil || limit < 1 {
+		ctx.JSON(http.StatusBadRequest, utils.Response{
+			Success: false,
+			Message: "Invalid limit number. Limit must be a positive integer.",
+		})
+		return
+	}
+
+	offset := (page - 1) * limit
+
+	movies, totalMovies, err := models.GetListMovies(searchTitle, limit, offset)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, utils.Response{
@@ -87,10 +114,18 @@ func GetListMoviesHandler(ctx *gin.Context) {
 		})
 	}
 
+	totalPages := (totalMovies + int(limit) - 1) / int(limit)
+
 	ctx.JSON(http.StatusOK, utils.Response{
 		Success: true,
 		Message: "List Movies",
 		Results: movies,
+		PageInfo: &utils.PageInfo{
+			Total:      totalMovies,
+			Page:       page,
+			Limit:      limit,
+			TotalPages: totalPages,
+		},
 	})
 }
 
