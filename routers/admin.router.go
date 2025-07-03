@@ -13,5 +13,6 @@ func adminRouter(r *gin.RouterGroup) {
 	r.GET("/movies", controllers.GetAllMoviesCreatedHandler)
 	r.GET("/movies/:id", controllers.GetMovieCreatedByIDHandler)
 	r.DELETE("/movies/:id", controllers.DeleteMovieHandler)
+	r.PATCH("/movies/:id", controllers.UpdateMovieHandler)
 
 }

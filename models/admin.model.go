@@ -182,3 +182,75 @@ func DeleteMovie(id int) error {
 
 	return nil
 }
+
+func UpdateMovie(id int, newData dto.UpdateMovieRequest) error {
+	conn, err := db.ConnectDB()
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	oldData := dto.UpdateMovieRequest{}
+
+	query := `SELECT title, backdrop_url, poster_url, release_date, runtime, overview, rating FROM movies WHERE id = $1`
+	err = conn.QueryRow(context.Background(), query, id).Scan(
+		&oldData.Title,
+		&oldData.BackdropUrl,
+		&oldData.PosterUrl,
+		&oldData.ReleaseDate,
+		&oldData.Runtime,
+		&oldData.Overview,
+		&oldData.Rating,
+	)
+	if err != nil {
+		return err
+	}
+
+	if newData.Title == "" &&
+		newData.BackdropUrl == "" &&
+		newData.PosterUrl == "" &&
+		newData.ReleaseDate.IsZero() &&
+		newData.Runtime == 0 &&
+		newData.Overview == "" &&
+		newData.Rating == 0 {
+		return fmt.Errorf("input data must not be empty")
+	}
+
+	if newData.Title != oldData.Title {
+		oldData.Title = newData.Title
+	}
+	if newData.BackdropUrl != oldData.BackdropUrl {
+		oldData.BackdropUrl = newData.BackdropUrl
+	}
+	if newData.PosterUrl != oldData.PosterUrl {
+		oldData.PosterUrl = newData.PosterUrl
+	}
+	if !newData.ReleaseDate.IsZero() && !newData.ReleaseDate.Equal(oldData.ReleaseDate) {
+		oldData.ReleaseDate = newData.ReleaseDate
+	}
+	if newData.Runtime != oldData.Runtime {
+		oldData.Runtime = newData.Runtime
+	}
+	if newData.Overview != oldData.Overview {
+		oldData.Overview = newData.Overview
+	}
+	if newData.Rating != oldData.Rating {
+		oldData.Rating = newData.Rating
+	}
+
+	_, err = conn.Exec(context.Background(), `
+	UPDATE movies 
+	SET poster_url = $1, backdrop_url = $2, title = $3, release_date = $4, runtime = $5, overview = $6, rating = $7 
+	WHERE id = $8`,
+		oldData.PosterUrl,
+		oldData.BackdropUrl,
+		oldData.Title,
+		oldData.ReleaseDate,
+		oldData.Runtime,
+		oldData.Overview,
+		oldData.Rating,
+		id,
+	)
+
+	return err
+}

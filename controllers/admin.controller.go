@@ -95,7 +95,7 @@ func GetAllMoviesCreatedHandler(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, utils.Response{
-		Success: false,
+		Success: true,
 		Message: "Success show list movies created",
 		Results: movies,
 	})
@@ -209,4 +209,67 @@ func DeleteMovieHandler(ctx *gin.Context) {
 		Message: fmt.Sprintf("Success delete movie with id = %d", id),
 	})
 
+}
+
+// @Summary      Update Movie (Admin Only)
+// @Description  Update a movie created by an admin using its ID
+// @Tags         Admins
+// @Accept       json
+// @Produce      json
+// @Param        id   path      int  true  "Movie ID"
+// @Param        body  body      dto.UpdateMovieRequest true  "Update movie body"
+// @Success      200  {object}  utils.Response
+// @Failure      400  {object}  utils.Response
+// @Failure      403  {object}  utils.Response
+// @Failure      404  {object}  utils.Response
+// @Failure      500  {object}  utils.Response
+// @Security     BearerAuth
+// @Router       /admin/movies/{id} [patch]
+func UpdateMovieHandler(ctx *gin.Context) {
+	role, _ := ctx.Get("role")
+
+	roleStr, ok := role.(string)
+	if !ok || roleStr != "admin" {
+		ctx.JSON(http.StatusForbidden, utils.Response{
+			Success: false,
+			Message: "Forbidden: Access is allowed for 'admin' role only",
+		})
+		return
+	}
+	idx := ctx.Param("id")
+	id, err := strconv.Atoi(idx)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, utils.Response{
+			Success: false,
+			Message: "Invalid movie ID",
+		})
+		return
+	}
+
+	newData := dto.UpdateMovieRequest{}
+	err = ctx.ShouldBindJSON(&newData)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, utils.Response{
+			Success: false,
+			Message: "Invalid input.",
+			Errors:  err.Error(),
+		})
+		return
+	}
+
+	err = models.UpdateMovie(id, newData)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, utils.Response{
+			Success: false,
+			Message: "Failed to update movie",
+			Errors:  err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, utils.Response{
+		Success: true,
+		Message: "Success update movie",
+		Results: "Update Movie " + newData.Title,
+	})
 }

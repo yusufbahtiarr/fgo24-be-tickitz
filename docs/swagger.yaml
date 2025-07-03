@@ -82,6 +82,31 @@ definitions:
     - confirm_password
     - password
     type: object
+  dto.UpdateMovieRequest:
+    properties:
+      backdrop_url:
+        type: string
+      overview:
+        type: string
+      poster_url:
+        type: string
+      rating:
+        type: number
+      release_date:
+        type: string
+      runtime:
+        type: integer
+      title:
+        type: string
+    required:
+    - backdrop_url
+    - overview
+    - poster_url
+    - rating
+    - release_date
+    - runtime
+    - title
+    type: object
   models.CreatedMovies:
     properties:
       genre:
@@ -334,6 +359,50 @@ paths:
       security:
       - BearerAuth: []
       summary: Get Movie by ID (Admin Only)
+      tags:
+      - Admins
+    patch:
+      consumes:
+      - application/json
+      description: Update a movie created by an admin using its ID
+      parameters:
+      - description: Movie ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update movie body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateMovieRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Update Movie (Admin Only)
       tags:
       - Admins
   /auth/forgot-password:
