@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/admins/movies": {
+        "/admin/movies": {
             "get": {
                 "security": [
                     {
@@ -119,7 +119,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/admins/movies/{id}": {
+        "/admin/movies/{id}": {
             "get": {
                 "security": [
                     {
@@ -605,7 +605,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/profile": {
+        "/user/profile": {
             "get": {
                 "security": [
                     {

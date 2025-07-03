@@ -22,7 +22,7 @@ import (
 // @Failure     400 {object} utils.Response
 // @Failure     500 {object} utils.Response
 // @Security     BearerAuth
-// @Router      /admins/movies [post]
+// @Router      /admin/movies [post]
 func CreateMovieHandler(ctx *gin.Context) {
 	movie := dto.CreateMovieRequest{}
 	role, _ := ctx.Get("role")
@@ -71,7 +71,7 @@ func CreateMovieHandler(ctx *gin.Context) {
 // @Failure      400  {object}  utils.Response
 // @Failure      500  {object}  utils.Response
 // @Security     BearerAuth
-// @Router       /admins/movies [get]
+// @Router       /admin/movies [get]
 func GetAllMoviesCreatedHandler(ctx *gin.Context) {
 	role, _ := ctx.Get("role")
 
@@ -114,7 +114,7 @@ func GetAllMoviesCreatedHandler(ctx *gin.Context) {
 // @Failure      404  {object}  utils.Response
 // @Failure      500  {object}  utils.Response
 // @Security     BearerAuth
-// @Router       /admins/movies/{id} [get]
+// @Router       /admin/movies/{id} [get]
 func GetMovieCreatedByIDHandler(ctx *gin.Context) {
 	role, _ := ctx.Get("role")
 
@@ -165,7 +165,7 @@ func GetMovieCreatedByIDHandler(ctx *gin.Context) {
 // @Failure      404  {object}  utils.Response
 // @Failure      500  {object}  utils.Response
 // @Security     BearerAuth
-// @Router       /admins/movies/{id} [delete]
+// @Router       /admin/movies/{id} [delete]
 func DeleteMovieHandler(ctx *gin.Context) {
 	role, _ := ctx.Get("role")
 

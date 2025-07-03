@@ -8,7 +8,7 @@
     },
     "basePath": "/",
     "paths": {
-        "/admins/movies": {
+        "/admin/movies": {
             "get": {
                 "security": [
                     {
@@ -112,7 +112,7 @@
                 }
             }
         },
-        "/admins/movies/{id}": {
+        "/admin/movies/{id}": {
             "get": {
                 "security": [
                     {
@@ -598,7 +598,7 @@
                 }
             }
         },
-        "/users/profile": {
+        "/user/profile": {
             "get": {
                 "security": [
                     {

@@ -10,9 +10,9 @@ import (
 )
 
 func CombineGroup(r *gin.Engine) {
-	adminRouter(r.Group("/admins"))
+	adminRouter(r.Group("/admin"))
 	authRouter(r.Group("/auth"))
-	userRouter(r.Group("/users"))
+	userRouter(r.Group("/user"))
 	movieRouter(r.Group("/movies"))
 
 	docs.SwaggerInfo.BasePath = "/"

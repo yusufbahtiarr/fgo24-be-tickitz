@@ -16,7 +16,7 @@ import (
 // @Success      200  {object}  utils.Response{results=models.UserProfile}
 // @Failure      500  {object}  utils.Response
 // @Security     BearerAuth
-// @Router       /users/profile [get]
+// @Router       /user/profile [get]
 func GetUserProfileHandler(ctx *gin.Context) {
 	userIdx, exists := ctx.Get("userId")
 	if !exists {

@@ -191,7 +191,7 @@ info:
   title: Tickitz - Booking Ticket App
   version: "1.0"
 paths:
-  /admins/movies:
+  /admin/movies:
     get:
       consumes:
       - application/json
@@ -254,7 +254,7 @@ paths:
       summary: Create new movie
       tags:
       - Admins
-  /admins/movies/{id}:
+  /admin/movies/{id}:
     delete:
       consumes:
       - application/json
@@ -568,7 +568,7 @@ paths:
       summary: Get Upcoming Movies
       tags:
       - Movies
-  /users/profile:
+  /user/profile:
     get:
       consumes:
       - application/json
