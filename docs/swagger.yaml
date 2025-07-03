@@ -154,6 +154,30 @@ info:
   version: "1.0"
 paths:
   /admins/movies:
+    get:
+      consumes:
+      - application/json
+      description: Get list all movies created through admin
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Get Movie Created
+      tags:
+      - Admins
     post:
       consumes:
       - application/json

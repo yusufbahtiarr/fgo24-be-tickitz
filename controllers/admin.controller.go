@@ -58,3 +58,43 @@ func CreateMovieHandler(ctx *gin.Context) {
 			"title": movie.Title,
 		}})
 }
+
+// @Summary     Get Movie Created
+// @Description Get list all movies created through admin
+// @Tags        Admins
+// @Accept      json
+// @Produce     json
+// @Success     201 {object} utils.Response
+// @Failure     400 {object} utils.Response
+// @Failure     500 {object} utils.Response
+// @Security     BearerAuth
+// @Router      /admins/movies [get]
+func GetAllMoviesCreatedHandler(ctx *gin.Context) {
+	role, _ := ctx.Get("role")
+
+	roleStr, ok := role.(string)
+	if !ok || roleStr != "admin" {
+		ctx.JSON(http.StatusForbidden, utils.Response{
+			Success: false,
+			Message: "Forbidden: Access is allowed for 'admin' role only",
+		})
+		return
+	}
+
+	movies, err := models.GetAllMoviesCreated()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, utils.Response{
+			Success: false,
+			Message: "Failed list movies created",
+			Errors:  err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, utils.Response{
+		Success: false,
+		Message: "Success show list movies created",
+		Results: movies,
+	})
+
+}
