@@ -12,5 +12,6 @@ func adminRouter(r *gin.RouterGroup) {
 	r.POST("/movies", controllers.CreateMovieHandler)
 	r.GET("/movies", controllers.GetAllMoviesCreatedHandler)
 	r.GET("/movies/:id", controllers.GetMovieCreatedByIDHandler)
+	r.DELETE("/movies/:id", controllers.DeleteMovieHandler)
 
 }

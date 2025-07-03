@@ -4,8 +4,10 @@ import (
 	"fgo24-be-tickitz/dto"
 	"fgo24-be-tickitz/models"
 	"fgo24-be-tickitz/utils"
+	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -149,4 +151,62 @@ func GetMovieCreatedByIDHandler(ctx *gin.Context) {
 		Message: "List Movie Created By ID",
 		Results: movie,
 	})
+}
+
+// @Summary      Delete Movie by ID (Admin Only)
+// @Description  Delete a movie created by an admin using its ID
+// @Tags         Admins
+// @Accept       json
+// @Produce      json
+// @Param        id   path      int  true  "Movie ID"
+// @Success      200  {object}  utils.Response
+// @Failure      400  {object}  utils.Response
+// @Failure      403  {object}  utils.Response
+// @Failure      404  {object}  utils.Response
+// @Failure      500  {object}  utils.Response
+// @Security     BearerAuth
+// @Router       /admins/movies/{id} [delete]
+func DeleteMovieHandler(ctx *gin.Context) {
+	role, _ := ctx.Get("role")
+
+	roleStr, ok := role.(string)
+	if !ok || roleStr != "admin" {
+		ctx.JSON(http.StatusForbidden, utils.Response{
+			Success: false,
+			Message: "Forbidden: Access is allowed for 'admin' role only",
+		})
+		return
+	}
+	idx := ctx.Param("id")
+	id, err := strconv.Atoi(idx)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, utils.Response{
+			Success: false,
+			Message: "Invalid movie ID",
+		})
+		return
+	}
+
+	err = models.DeleteMovie(id)
+	if err != nil {
+		if strings.Contains(err.Error(), "movie not found") {
+			ctx.JSON(http.StatusNotFound, utils.Response{
+				Success: false,
+				Message: fmt.Sprintf("Movie with id = %d not found", id),
+			})
+		} else {
+			ctx.JSON(http.StatusBadRequest, utils.Response{
+				Success: false,
+				Message: "Failed to delete movie",
+				Errors:  err.Error(),
+			})
+		}
+		return
+	}
+
+	ctx.JSON(http.StatusOK, utils.Response{
+		Success: true,
+		Message: fmt.Sprintf("Success delete movie with id = %d", id),
+	})
+
 }

@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"errors"
 	"fgo24-be-tickitz/db"
 	"fgo24-be-tickitz/dto"
 	"fmt"
@@ -160,4 +161,24 @@ func GetMovieCreatedByID(id int) (DetailCreatedMovie, error) {
 	}
 
 	return movie, err
+}
+
+func DeleteMovie(id int) error {
+	conn, err := db.ConnectDB()
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	query := `DELETE from movies WHERE id = $1`
+	result, err := conn.Exec(context.Background(), query, id)
+	if err != nil {
+		return err
+	}
+
+	if result.RowsAffected() == 0 {
+		return errors.New("movie not found")
+	}
+
+	return nil
 }
