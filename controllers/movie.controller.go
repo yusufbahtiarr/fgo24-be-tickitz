@@ -18,8 +18,8 @@ import (
 // @Success      200  {array}   models.UpcomingMovie
 // @Failure      500  {object}  utils.Response
 // @Router       /movies/upcoming [get]
-func GetUpcomingMovies(ctx *gin.Context) {
-	movies, err := models.FindUpcomingMovies()
+func GetUpcomingMoviesHandler(ctx *gin.Context) {
+	movies, err := models.GetUpcomingMovies()
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, utils.Response{
 			Success: false,
@@ -30,7 +30,32 @@ func GetUpcomingMovies(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, utils.Response{
 		Success: true,
-		Message: "Upcoming Movies",
+		Message: "List Upcoming Movies",
+		Results: movies,
+	})
+}
+
+// @Summary      Get Now Showing Movies
+// @Description  Retrieve a list of now showing movies
+// @Tags         Movies
+// @Accept       json
+// @Produce      json
+// @Success      200  {array}   models.NowShowingMovie
+// @Failure      500  {object}  utils.Response
+// @Router       /movies/now-showing [get]
+func GetNowShowingMoviesHandler(ctx *gin.Context) {
+	movies, err := models.GetNowShowingMovies()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, utils.Response{
+			Success: false,
+			Message: "Internal server error",
+			Errors:  err.Error(),
+		})
+	}
+
+	ctx.JSON(http.StatusOK, utils.Response{
+		Success: true,
+		Message: "List Now Showing Movies",
 		Results: movies,
 	})
 }
@@ -44,9 +69,9 @@ func GetUpcomingMovies(ctx *gin.Context) {
 // @Success      200     {array}  models.Movies
 // @Failure      500     {object}  utils.Response
 // @Router       /movies [get]
-func GetListMovies(ctx *gin.Context) {
+func GetListMoviesHandler(ctx *gin.Context) {
 	searchTitle := ctx.Query("search")
-	movies, err := models.FindListMovies(searchTitle)
+	movies, err := models.GetListMovies(searchTitle)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, utils.Response{
@@ -78,7 +103,7 @@ func GetListMovies(ctx *gin.Context) {
 // @Success      200  {object}  models.Movie
 // @Failure      404  {object}  utils.Response
 // @Router       /movies/{id} [get]
-func GetMovieByID(ctx *gin.Context) {
+func GetMovieByIDHandler(ctx *gin.Context) {
 	idx := ctx.Param("id")
 	id, err := strconv.Atoi(idx)
 	if err != nil {
@@ -89,7 +114,7 @@ func GetMovieByID(ctx *gin.Context) {
 		return
 	}
 
-	movie, err := models.FindMovieByID(id)
+	movie, err := models.GetMovieByID(id)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, utils.Response{
 			Success: false,

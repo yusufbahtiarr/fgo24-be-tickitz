@@ -88,8 +88,6 @@ definitions:
         type: string
       id:
         type: integer
-      id_director:
-        type: integer
       overview:
         type: string
       poster_url:
@@ -103,7 +101,7 @@ definitions:
       title:
         type: string
     type: object
-  models.UpcomingMovie:
+  models.NowShowingMovie:
     properties:
       genre:
         type: string
@@ -113,6 +111,19 @@ definitions:
         type: string
       rating:
         type: number
+      release_date:
+        type: string
+      title:
+        type: string
+    type: object
+  models.UpcomingMovie:
+    properties:
+      genre:
+        type: string
+      id:
+        type: integer
+      poster_url:
+        type: string
       release_date:
         type: string
       title:
@@ -362,6 +373,27 @@ paths:
           schema:
             $ref: '#/definitions/utils.Response'
       summary: Get Movie By ID
+      tags:
+      - Movies
+  /movies/now-showing:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of now showing movies
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.NowShowingMovie'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Get Now Showing Movies
       tags:
       - Movies
   /movies/upcoming:

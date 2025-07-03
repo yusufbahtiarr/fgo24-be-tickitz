@@ -318,6 +318,38 @@ const docTemplate = `{
                 }
             }
         },
+        "/movies/now-showing": {
+            "get": {
+                "description": "Retrieve a list of now showing movies",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Movies"
+                ],
+                "summary": "Get Now Showing Movies",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.NowShowingMovie"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/movies/upcoming": {
             "get": {
                 "description": "Retrieve a list of upcoming movies",
@@ -563,9 +595,6 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "id_director": {
-                    "type": "integer"
-                },
                 "overview": {
                     "type": "string"
                 },
@@ -586,7 +615,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.UpcomingMovie": {
+        "models.NowShowingMovie": {
             "type": "object",
             "properties": {
                 "genre": {
@@ -600,6 +629,26 @@ const docTemplate = `{
                 },
                 "rating": {
                     "type": "number"
+                },
+                "release_date": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.UpcomingMovie": {
+            "type": "object",
+            "properties": {
+                "genre": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "poster_url": {
+                    "type": "string"
                 },
                 "release_date": {
                     "type": "string"
