@@ -141,6 +141,7 @@ func GetMovieCreatedByIDHandler(ctx *gin.Context) {
 			Message: "Failed to show movies created by id",
 			Errors:  err.Error(),
 		})
+		return
 	}
 
 	ctx.JSON(http.StatusOK, utils.Response{
