@@ -82,6 +82,44 @@ definitions:
     - confirm_password
     - password
     type: object
+  models.CreatedMovies:
+    properties:
+      genre:
+        type: string
+      id:
+        type: integer
+      poster_url:
+        type: string
+      release_date:
+        type: string
+      runtime:
+        type: string
+      title:
+        type: string
+    type: object
+  models.DetailCreatedMovie:
+    properties:
+      backdrop_url:
+        type: string
+      cast:
+        type: string
+      director:
+        type: string
+      genre:
+        type: string
+      id:
+        type: integer
+      overview:
+        type: string
+      poster_url:
+        type: string
+      release_date:
+        type: string
+      runtime:
+        type: string
+      title:
+        type: string
+    type: object
   models.Movie:
     properties:
       backdrop_url:
@@ -157,14 +195,21 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get list all movies created through admin
+      description: Retrieve the list of all movies created through the admin panel
       produces:
       - application/json
       responses:
-        "201":
-          description: Created
+        "200":
+          description: OK
           schema:
-            $ref: '#/definitions/utils.Response'
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                results:
+                  items:
+                    $ref: '#/definitions/models.CreatedMovies'
+                  type: array
+              type: object
         "400":
           description: Bad Request
           schema:
@@ -175,7 +220,7 @@ paths:
             $ref: '#/definitions/utils.Response'
       security:
       - BearerAuth: []
-      summary: Get Movie Created
+      summary: Get All Movies Created by Admin
       tags:
       - Admins
     post:
@@ -207,6 +252,50 @@ paths:
       security:
       - BearerAuth: []
       summary: Create new movie
+      tags:
+      - Admins
+  /admins/movies/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a specific movie created by the admin using its ID
+      parameters:
+      - description: Movie ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                results:
+                  $ref: '#/definitions/models.DetailCreatedMovie'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Get Movie by ID (Admin Only)
       tags:
       - Admins
   /auth/forgot-password:

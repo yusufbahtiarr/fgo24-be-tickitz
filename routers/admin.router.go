@@ -11,5 +11,6 @@ func adminRouter(r *gin.RouterGroup) {
 	r.Use(middlewares.VerifyToken())
 	r.POST("/movies", controllers.CreateMovieHandler)
 	r.GET("/movies", controllers.GetAllMoviesCreatedHandler)
+	r.GET("/movies/:id", controllers.GetMovieCreatedByIDHandler)
 
 }
