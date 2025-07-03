@@ -3,8 +3,12 @@ package models
 import (
 	"context"
 	"fgo24-be-tickitz/db"
+	"fgo24-be-tickitz/dto"
+	"fmt"
+	"time"
 
 	"github.com/jackc/pgx/v5"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
@@ -18,7 +22,15 @@ type User struct {
 type UserProfile struct {
 	Email    string  `json:"email"`
 	Fullname *string `json:"fullname"`
-	Phone    *string `json:"password"`
+	Phone    *string `json:"phone"`
+}
+
+type OldUserProfile struct {
+	Email     string  `json:"email"`
+	Fullname  *string `json:"fullname"`
+	Phone     *string `json:"phone"`
+	Password  string  `json:"password"`
+	IdProfile int     `json:"id_profile"`
 }
 
 func FindUserByEmail(email string) (User, error) {
@@ -85,4 +97,98 @@ func FindUserProfile(id int) (UserProfile, error) {
 		return UserProfile{}, err
 	}
 	return user, err
+}
+
+func UpdateProfile(id int, newData dto.UpdateProfileRequest) error {
+	conn, errConn := db.ConnectDB()
+	if errConn != nil {
+		return errConn
+	}
+	defer conn.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	trx, err := conn.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer func() {
+		if err != nil {
+			trx.Rollback(context.Background())
+		}
+	}()
+
+	oldData := OldUserProfile{}
+
+	query := `SELECT p.fullname, u.email, p.phone, u.password, u.id_profile FROM users u
+ JOIN profiles p ON p.id = u.id_profile 
+ WHERE u.id = $1`
+	err = conn.QueryRow(context.Background(), query, id).Scan(
+		&oldData.Fullname,
+		&oldData.Email,
+		&oldData.Phone,
+		&oldData.Password,
+		&oldData.IdProfile,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to get user data: %w", err)
+	}
+
+	if newData.NewPassword != "" {
+		if newData.ConfirmPassword == "" {
+			err = fmt.Errorf("confirmation password is required when setting a new password")
+			return err
+		}
+		if len(newData.NewPassword) < 8 {
+			err = fmt.Errorf("password must be at least 8 characters long")
+			return err
+		}
+		if newData.NewPassword != newData.ConfirmPassword {
+			err = fmt.Errorf("new password and confirmation password must match")
+			return err
+		}
+		hashedPassword, errHash := bcrypt.GenerateFromPassword(
+			[]byte(newData.NewPassword),
+			bcrypt.DefaultCost,
+		)
+		if errHash != nil {
+			err = fmt.Errorf("failed to hash password: %w", errHash)
+			return err
+		}
+		oldData.Password = string(hashedPassword)
+	}
+
+	if newData.Fullname != "" && (oldData.Fullname == nil || newData.Fullname != *oldData.Fullname) {
+		oldData.Fullname = &newData.Fullname
+	}
+	if newData.Email != "" && newData.Email != oldData.Email {
+		oldData.Email = newData.Email
+	}
+	if newData.Phone != "" && (oldData.Phone == nil || newData.Phone != *oldData.Phone) {
+		oldData.Phone = &newData.Phone
+	}
+
+	_, err = trx.Exec(context.Background(),
+		`UPDATE users SET email = $1, password = $2 WHERE id = $3 
+ `,
+		oldData.Email, oldData.Password, id,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to update user: %w", err)
+	}
+
+	_, err = trx.Exec(context.Background(),
+		`UPDATE profiles SET fullname = $1, phone = $2 WHERE id = $3`,
+		oldData.Fullname, oldData.Phone, oldData.IdProfile,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to update profile: %w", err)
+	}
+
+	if err = trx.Commit(context.Background()); err != nil {
+		return fmt.Errorf("transaction commit failed: %w", err)
+	}
+
+	return err
 }

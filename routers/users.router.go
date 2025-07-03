@@ -9,5 +9,5 @@ import (
 
 func userRouter(r *gin.RouterGroup) {
 	r.GET("/profile", middlewares.VerifyToken(), controllers.GetUserProfileHandler)
-	// r.POST("/profile", middlewares.VerifyToken(), controller.EditProfile)
+	r.PATCH("/profile", middlewares.VerifyToken(), controllers.EditProfileHandler)
 }

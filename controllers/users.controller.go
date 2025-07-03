@@ -1,15 +1,17 @@
 package controllers
 
 import (
+	"fgo24-be-tickitz/dto"
 	"fgo24-be-tickitz/models"
 	"fgo24-be-tickitz/utils"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
 // @Summary      Get User Profile
-// @Description  Get detailed information about the currently logged-in user.
+// @Description  Get detailed profile information of the currently logged-in user based on the JWT token.
 // @Tags         Users
 // @Accept       json
 // @Produce      json
@@ -22,33 +24,39 @@ func GetUserProfileHandler(ctx *gin.Context) {
 	if !exists {
 		ctx.JSON(http.StatusUnauthorized, utils.Response{
 			Success: false,
-			Message: "Unauthorized: No user ID found in token",
+			Message: "Unauthorized: user ID not found in context",
 		})
 		return
 	}
 
-	role, _ := ctx.Get("role")
-
-	roleStr, ok := role.(string)
-	if !ok || roleStr != "user" {
-		ctx.JSON(http.StatusForbidden, utils.Response{
-			Success: false,
-			Message: "Forbidden: Access is allowed for 'user' role only",
-		})
-		return
-	}
-
-	userIdFloat, ok := userIdx.(float64)
+	userIdStr, ok := userIdx.(string)
 	if !ok {
 		ctx.JSON(http.StatusInternalServerError, utils.Response{
 			Success: false,
-			Message: "Failed to convert user ID",
+			Message: "Invalid user ID format in token",
 		})
 		return
 	}
-	userId := int(userIdFloat)
 
-	// fmt.Printf("User yang sedang login adalah user dengan id %d dengan role %s\n", userId, role)
+	userId, err := strconv.Atoi(userIdStr)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, utils.Response{
+			Success: false,
+			Message: "Failed to parse user ID",
+		})
+		return
+	}
+
+	// role, _ := ctx.Get("role")
+
+	// roleStr, ok := role.(string)
+	// if !ok || roleStr != "user" {
+	// 	ctx.JSON(http.StatusForbidden, utils.Response{
+	// 		Success: false,
+	// 		Message: "Forbidden: Access is allowed for 'user' role only",
+	// 	})
+	// 	return
+	// }
 
 	user, err := models.FindUserProfile(userId)
 	if err != nil {
@@ -66,4 +74,70 @@ func GetUserProfileHandler(ctx *gin.Context) {
 		Results: user,
 	})
 
+}
+
+// @Summary      Edit User Profile
+// @Description  Edit user profile based on the JWT token provided.
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Param        data  body      dto.UpdateProfileRequest  true  "Updated profile data"
+// @Success      200   {object}  utils.Response
+// @Failure      400   {object}  utils.Response
+// @Failure      401   {object}  utils.Response
+// @Failure      500   {object}  utils.Response
+// @Security     BearerAuth
+// @Router       /user/profile [patch]
+func EditProfileHandler(ctx *gin.Context) {
+	userIdx, exists := ctx.Get("userId")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, utils.Response{
+			Success: false,
+			Message: "Unauthorized: user ID not found in context",
+		})
+		return
+	}
+
+	userIdStr, ok := userIdx.(string)
+	if !ok {
+		ctx.JSON(http.StatusInternalServerError, utils.Response{
+			Success: false,
+			Message: "Invalid user ID format in token",
+		})
+		return
+	}
+
+	userId, err := strconv.Atoi(userIdStr)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, utils.Response{
+			Success: false,
+			Message: "Failed to parse user ID",
+		})
+		return
+	}
+
+	newData := dto.UpdateProfileRequest{}
+	err = ctx.ShouldBindJSON(&newData)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, utils.Response{
+			Success: false,
+			Message: "Invalid input.",
+			Errors:  err.Error(),
+		})
+		return
+	}
+	err = models.UpdateProfile(userId, newData)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, utils.Response{
+			Success: false,
+			Message: "Internal server error",
+			Errors:  err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, utils.Response{
+		Success: true,
+		Message: "Success Update User Profile",
+	})
 }
