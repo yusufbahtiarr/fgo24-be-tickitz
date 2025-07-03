@@ -13,7 +13,7 @@ type UpcomingMovie struct {
 	PosterURL   string    `json:"poster_url"`
 	Title       string    `json:"title"`
 	ReleaseDate time.Time `json:"release_date"`
-	Genre       string    `json:"genre"`
+	Genre       *string   `json:"genre"`
 	Rating      float32   `json:"rating"`
 }
 
@@ -39,12 +39,14 @@ func FindUpcomingMovies() ([]UpcomingMovie, error) {
 	defer conn.Close()
 
 	query2 := `SELECT m.id, m.poster_url, m.title, m.release_date,
-  ( SELECT STRING_AGG(g.genre_name, ', ') 
+  (
+    SELECT STRING_AGG(g.genre_name, ', ') 
     FROM movie_genres mg
     JOIN genres g ON g.id = mg.id_genre
     WHERE mg.id_movie = m.id
   ) AS genre, m.rating
-FROM movies m;`
+	FROM movies m 
+	WHERE m.release_date > CURRENT_DATE;`
 	rows, err := conn.Query(context.Background(), query2)
 	if err != nil {
 		return []UpcomingMovie{}, err
