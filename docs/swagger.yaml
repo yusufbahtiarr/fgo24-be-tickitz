@@ -249,6 +249,15 @@ paths:
       consumes:
       - application/json
       description: Retrieve the list of all movies created through the admin panel
+      parameters:
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Items per page (5)
+        in: query
+        name: limit
+        type: integer
       produces:
       - application/json
       responses:
@@ -258,6 +267,8 @@ paths:
             allOf:
             - $ref: '#/definitions/utils.Response'
             - properties:
+                page_info:
+                  $ref: '#/definitions/utils.PageInfo'
                 results:
                   items:
                     $ref: '#/definitions/models.CreatedMovies'

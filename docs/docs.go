@@ -33,6 +33,20 @@ const docTemplate = `{
                     "Admins"
                 ],
                 "summary": "Get All Movies Created by Admin",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page (5)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -44,6 +58,9 @@ const docTemplate = `{
                                 {
                                     "type": "object",
                                     "properties": {
+                                        "page_info": {
+                                            "$ref": "#/definitions/utils.PageInfo"
+                                        },
                                         "results": {
                                             "type": "array",
                                             "items": {

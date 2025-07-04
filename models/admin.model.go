@@ -94,10 +94,10 @@ func CreateMovie(movie dto.CreateMovieRequest) error {
 	return nil
 }
 
-func GetAllMoviesCreated() ([]CreatedMovies, error) {
+func GetAllMoviesCreated(limit, offset int) ([]CreatedMovies, int, error) {
 	conn, err := db.ConnectDB()
 	if err != nil {
-		return []CreatedMovies{}, err
+		return []CreatedMovies{}, 0, err
 	}
 	defer conn.Close()
 
@@ -109,18 +109,26 @@ func GetAllMoviesCreated() ([]CreatedMovies, error) {
     WHERE mg.id_movie = m.id
   ) AS genre, m.release_date, m.runtime
 	FROM movies m 
-	ORDER BY created_at DESC;`
-	rows, err := conn.Query(context.Background(), query)
+	ORDER BY created_at DESC
+	LIMIT $1 OFFSET $2;`
+	rows, err := conn.Query(context.Background(), query, limit, offset)
 	if err != nil {
-		return []CreatedMovies{}, err
+		return []CreatedMovies{}, 0, err
 	}
 
 	movies, err := pgx.CollectRows[CreatedMovies](rows, pgx.RowToStructByName)
 	if err != nil {
-		return []CreatedMovies{}, err
+		return []CreatedMovies{}, 0, err
 	}
 
-	return movies, err
+	Count := `SELECT COUNT(*)	FROM movies`
+	var totalMovies int
+	err = conn.QueryRow(context.Background(), Count).Scan(&totalMovies)
+	if err != nil {
+		return []CreatedMovies{}, 0, err
+	}
+
+	return movies, totalMovies, err
 }
 
 func GetMovieCreatedByID(id int) (DetailCreatedMovie, error) {

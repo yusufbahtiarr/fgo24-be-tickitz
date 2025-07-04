@@ -67,7 +67,9 @@ func CreateMovieHandler(ctx *gin.Context) {
 // @Tags         Admins
 // @Accept       json
 // @Produce      json
-// @Success      200  {object}  utils.Response{results=[]models.CreatedMovies}
+// @Param        page   query    int     false  "Page"
+// @Param        limit  query    int     false  "Items per page (5)"
+// @Success      200  {object}  utils.Response{results=[]models.CreatedMovies{},page_info=utils.PageInfo}
 // @Failure      400  {object}  utils.Response
 // @Failure      500  {object}  utils.Response
 // @Security     BearerAuth
@@ -84,7 +86,30 @@ func GetAllMoviesCreatedHandler(ctx *gin.Context) {
 		return
 	}
 
-	movies, err := models.GetAllMoviesCreated()
+	pageX := ctx.DefaultQuery("page", "1")
+	limitX := ctx.DefaultQuery("limit", "5")
+
+	page, err := strconv.Atoi(pageX)
+	if err != nil || page < 1 {
+		ctx.JSON(http.StatusBadRequest, utils.Response{
+			Success: false,
+			Message: "Invalid page number. Page must be a positive integer.",
+		})
+		return
+	}
+
+	limit, err := strconv.Atoi(limitX)
+	if err != nil || limit < 1 {
+		ctx.JSON(http.StatusBadRequest, utils.Response{
+			Success: false,
+			Message: "Invalid limit number. Limit must be a positive integer.",
+		})
+		return
+	}
+
+	offset := (page - 1) * limit
+
+	movies, totalMovies, err := models.GetAllMoviesCreated(limit, offset)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, utils.Response{
 			Success: false,
@@ -94,10 +119,18 @@ func GetAllMoviesCreatedHandler(ctx *gin.Context) {
 		return
 	}
 
+	totalPages := (totalMovies + int(limit) - 1) / int(limit)
+
 	ctx.JSON(http.StatusOK, utils.Response{
 		Success: true,
 		Message: "Success show list movies created",
 		Results: movies,
+		PageInfo: &utils.PageInfo{
+			Total:      totalMovies,
+			Page:       page,
+			Limit:      limit,
+			TotalPages: totalPages,
+		},
 	})
 
 }
