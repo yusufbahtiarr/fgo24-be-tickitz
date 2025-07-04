@@ -141,3 +141,58 @@ func EditProfileHandler(ctx *gin.Context) {
 		Message: "Success Update User Profile",
 	})
 }
+
+// @Summary      Get User Transaction History
+// @Description  Retrieve the transaction history of the currently logged-in user based on the JWT token.
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  utils.Response{results=[]models.Transaction}  "Successfully retrieved transaction history"
+// @Failure      401  {object}  utils.Response  "Unauthorized: user ID not found or invalid token"
+// @Failure      500  {object}  utils.Response  "Internal server error"
+// @Security     BearerAuth
+// @Router       /user/transaction-history [get]
+func GetTransactionHistoryHandler(ctx *gin.Context) {
+	userIdx, exists := ctx.Get("userId")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, utils.Response{
+			Success: false,
+			Message: "Unauthorized: user ID not found",
+		})
+		return
+	}
+
+	userIdStr, ok := userIdx.(string)
+	if !ok {
+		ctx.JSON(http.StatusInternalServerError, utils.Response{
+			Success: false,
+			Message: "Invalid user ID format in token",
+		})
+		return
+	}
+
+	userId, err := strconv.Atoi(userIdStr)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, utils.Response{
+			Success: false,
+			Message: "Failed to parse user ID",
+		})
+		return
+	}
+
+	history, err := models.GetTransactionHistory(userId)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, utils.Response{
+			Success: false,
+			Message: "Internal server error",
+			Errors:  err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, utils.Response{
+		Success: true,
+		Message: "Success show history transaction",
+		Results: history,
+	})
+}

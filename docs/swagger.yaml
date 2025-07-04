@@ -194,6 +194,35 @@ definitions:
       title:
         type: string
     type: object
+  models.Transaction:
+    properties:
+      cinema_name:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      location:
+        type: string
+      movie_date:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+      status_payment:
+        type: string
+      status_ticket:
+        type: string
+      time:
+        type: string
+      title:
+        type: string
+      total_payment:
+        type: integer
+      virtual_account:
+        type: string
+    type: object
   models.UpcomingMovie:
     properties:
       genre:
@@ -761,6 +790,39 @@ paths:
       security:
       - BearerAuth: []
       summary: Edit User Profile
+      tags:
+      - Users
+  /user/transaction-history:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve the transaction history of the currently logged-in user
+        based on the JWT token.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved transaction history
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                results:
+                  items:
+                    $ref: '#/definitions/models.Transaction'
+                  type: array
+              type: object
+        "401":
+          description: 'Unauthorized: user ID not found or invalid token'
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Get User Transaction History
       tags:
       - Users
 securityDefinitions:

@@ -9,5 +9,6 @@ import (
 
 func userRouter(r *gin.RouterGroup) {
 	r.GET("/profile", middlewares.VerifyToken(), controllers.GetUserProfileHandler)
+	r.GET("/transaction-history", middlewares.VerifyToken(), controllers.GetTransactionHistoryHandler)
 	r.PATCH("/profile", middlewares.VerifyToken(), controllers.EditProfileHandler)
 }

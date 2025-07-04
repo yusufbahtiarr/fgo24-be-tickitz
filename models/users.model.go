@@ -33,6 +33,22 @@ type OldUserProfile struct {
 	IdProfile int     `json:"id_profile"`
 }
 
+type Transaction struct {
+	ID             int       `json:"id"`
+	Name           string    `json:"name"`
+	Email          string    `json:"email"`
+	Phone          string    `json:"phone"`
+	VirtualAccount string    `json:"virtual_account"`
+	TotalPayment   int       `json:"total_payment"`
+	MovieDate      time.Time `json:"movie_date"`
+	StatusPayment  string    `json:"status_payment"`
+	StatusTicket   string    `json:"status_ticket"`
+	Title          string    `json:"title"`
+	Cinema         string    `json:"cinema"`
+	Time           time.Time `json:"time"`
+	Location       string    `json:"location"`
+}
+
 func FindUserByEmail(email string) (User, error) {
 	conn, err := db.ConnectDB()
 	if err != nil {
@@ -191,4 +207,32 @@ func UpdateProfile(id int, newData dto.UpdateProfileRequest) error {
 	}
 
 	return err
+}
+
+func GetTransactionHistory(id int) ([]Transaction, error) {
+	conn, err := db.ConnectDB()
+	if err != nil {
+		return []Transaction{}, err
+	}
+	defer conn.Close()
+
+	query := `SELECT t.id, t.name, t.email, t.phone, t.virtual_account, t.total_payment, t.movie_date, t.status_payment, t.status_ticket, m.title, c.cinema_name as cinema, tm.time, l.location FROM transactions t
+	JOIN movies m ON m.id = t.id_movie
+	JOIN cinemas c ON c.id = t.id_cinema
+	JOIN times tm ON tm.id = t.id_time
+	JOIN locations l ON l.id = t.id_location
+	WHERE t.id_user = $1
+	ORDER by t.created_at DESC`
+	rows, err := conn.Query(context.Background(), query, id)
+	if err != nil {
+		return []Transaction{}, err
+	}
+	defer rows.Close()
+
+	history, err := pgx.CollectRows[Transaction](rows, pgx.RowToStructByName)
+	if err != nil {
+		return []Transaction{}, err
+	}
+
+	return history, err
 }
