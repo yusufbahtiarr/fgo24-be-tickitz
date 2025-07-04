@@ -572,6 +572,12 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
+                        "type": "string",
+                        "description": "Filter by genre",
+                        "name": "genre",
+                        "in": "query"
+                    },
+                    {
                         "type": "integer",
                         "description": "Page",
                         "name": "page",
@@ -1179,7 +1185,7 @@ const docTemplate = `{
         "models.Transaction": {
             "type": "object",
             "properties": {
-                "cinema_name": {
+                "cinema": {
                     "type": "string"
                 },
                 "email": {

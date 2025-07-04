@@ -66,6 +66,7 @@ func GetNowShowingMoviesHandler(ctx *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Param        search query    string  false  "Search by movie title"
+// @Param        genre query    string  false  "Filter by genre"
 // @Param        page   query    int     false  "Page"
 // @Param        limit  query    int     false  "Items per page (5)"
 // @Success      200    {object} utils.Response{results=[]models.Movie,page_info=utils.PageInfo}
@@ -75,6 +76,7 @@ func GetNowShowingMoviesHandler(ctx *gin.Context) {
 // @Router       /movies [get]
 func GetListMoviesHandler(ctx *gin.Context) {
 	searchTitle := ctx.Query("search")
+	genre := ctx.Query("genre")
 	pageX := ctx.DefaultQuery("page", "1")
 	limitX := ctx.DefaultQuery("limit", "5")
 
@@ -98,7 +100,7 @@ func GetListMoviesHandler(ctx *gin.Context) {
 
 	offset := (page - 1) * limit
 
-	movies, totalMovies, err := models.GetListMovies(searchTitle, limit, offset)
+	movies, totalMovies, err := models.GetListMovies(searchTitle, genre, limit, offset)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, utils.Response{
@@ -112,6 +114,7 @@ func GetListMoviesHandler(ctx *gin.Context) {
 			Message: "Failed to search movies by title",
 			Errors:  err.Error(),
 		})
+		return
 	}
 
 	totalPages := (totalMovies + int(limit) - 1) / int(limit)

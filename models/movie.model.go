@@ -97,7 +97,7 @@ func GetNowShowingMovies() ([]NowShowingMovie, error) {
 	return movies, err
 }
 
-func GetListMovies(title string, limit, offset int) (Movies, int, error) {
+func GetListMovies(title, genre string, limit, offset int) (Movies, int, error) {
 	conn, err := db.ConnectDB()
 	if err != nil {
 		return Movies{}, 0, err
@@ -107,13 +107,24 @@ func GetListMovies(title string, limit, offset int) (Movies, int, error) {
 	search := "%" + title + "%"
 
 	query := `
-		SELECT id, poster_url, backdrop_url, title, release_date, runtime, overview, rating
-		FROM movies
-		WHERE title ILIKE $1
-		ORDER BY title
+		SELECT m.id, m.poster_url, m.backdrop_url, m.title, m.release_date, m.runtime, m.overview, m.rating
+		FROM movies m
+		WHERE m.title ILIKE $1
+		AND (
+		$4 = '' OR
+		EXISTS (
+				SELECT 1
+				FROM movie_genres mg
+				JOIN genres g on g.id = mg.id_genre
+				WHERE mg.id_movie = m.id
+				AND g.genre_name ILIKE $4
+			)
+		
+		)
+		ORDER BY m.title
 		LIMIT $2 OFFSET $3
 	`
-	rows, err := conn.Query(context.Background(), query, search, limit, offset)
+	rows, err := conn.Query(context.Background(), query, search, limit, offset, genre)
 	if err != nil {
 		return Movies{}, 0, err
 	}
@@ -124,9 +135,18 @@ func GetListMovies(title string, limit, offset int) (Movies, int, error) {
 		return Movies{}, 0, err
 	}
 
-	Count := `SELECT COUNT(*)	FROM movies	WHERE title ILIKE $1	`
+	Count := `SELECT COUNT(*)	FROM movies m	WHERE title ILIKE $1 AND (
+		$2 = '' OR
+		EXISTS (
+				SELECT 1
+				FROM movie_genres mg
+				JOIN genres g on g.id = mg.id_genre
+				WHERE mg.id_movie = m.id
+				AND g.genre_name ILIKE $2
+			)
+		)`
 	var totalMovies int
-	err = conn.QueryRow(context.Background(), Count, search).Scan(&totalMovies)
+	err = conn.QueryRow(context.Background(), Count, search, genre).Scan(&totalMovies)
 	if err != nil {
 		return Movies{}, 0, err
 	}

@@ -196,7 +196,7 @@ definitions:
     type: object
   models.Transaction:
     properties:
-      cinema_name:
+      cinema:
         type: string
       email:
         type: string
@@ -623,6 +623,10 @@ paths:
       - description: Search by movie title
         in: query
         name: search
+        type: string
+      - description: Filter by genre
+        in: query
+        name: genre
         type: string
       - description: Page
         in: query
