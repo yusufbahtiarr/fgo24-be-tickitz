@@ -6,6 +6,7 @@ import (
 	"fgo24-be-tickitz/utils"
 	"fmt"
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -67,8 +68,9 @@ func CreateMovieHandler(ctx *gin.Context) {
 // @Tags         Admins
 // @Accept       json
 // @Produce      json
-// @Param        page   query    int     false  "Page"
-// @Param        limit  query    int     false  "Items per page (5)"
+// @Param        release_month   query    string     false  "Filter by Release Month (e.g., 2025-07)"
+// @Param        page   query    int     false  "Page (e.g., 1)"
+// @Param        limit  query    int     false  "Items per page (e.g., 5)"
 // @Success      200  {object}  utils.Response{results=[]models.CreatedMovies{},page_info=utils.PageInfo}
 // @Failure      400  {object}  utils.Response
 // @Failure      500  {object}  utils.Response
@@ -76,6 +78,7 @@ func CreateMovieHandler(ctx *gin.Context) {
 // @Router       /admin/movies [get]
 func GetAllMoviesCreatedHandler(ctx *gin.Context) {
 	role, _ := ctx.Get("role")
+	releaseMonth := ctx.Query("release_month")
 
 	roleStr, ok := role.(string)
 	if !ok || roleStr != "admin" {
@@ -88,6 +91,17 @@ func GetAllMoviesCreatedHandler(ctx *gin.Context) {
 
 	pageX := ctx.DefaultQuery("page", "1")
 	limitX := ctx.DefaultQuery("limit", "5")
+
+	if releaseMonth != "" {
+		matched, err := regexp.MatchString(`^\d{4}-(0[1-9]|1[0-2])$`, releaseMonth)
+		if err != nil || !matched {
+			ctx.JSON(http.StatusBadRequest, utils.Response{
+				Success: false,
+				Message: "Invalid Release Month format. Use YYYY-MM (e.g., 2025-06).",
+			})
+			return
+		}
+	}
 
 	page, err := strconv.Atoi(pageX)
 	if err != nil || page < 1 {
@@ -109,7 +123,7 @@ func GetAllMoviesCreatedHandler(ctx *gin.Context) {
 
 	offset := (page - 1) * limit
 
-	movies, totalMovies, err := models.GetAllMoviesCreated(limit, offset)
+	movies, totalMovies, err := models.GetAllMoviesCreated(releaseMonth, limit, offset)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, utils.Response{
 			Success: false,

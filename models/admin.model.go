@@ -94,7 +94,7 @@ func CreateMovie(movie dto.CreateMovieRequest) error {
 	return nil
 }
 
-func GetAllMoviesCreated(limit, offset int) ([]CreatedMovies, int, error) {
+func GetAllMoviesCreated(releaseMonth string, limit, offset int) ([]CreatedMovies, int, error) {
 	conn, err := db.ConnectDB()
 	if err != nil {
 		return []CreatedMovies{}, 0, err
@@ -109,9 +109,10 @@ func GetAllMoviesCreated(limit, offset int) ([]CreatedMovies, int, error) {
     WHERE mg.id_movie = m.id
   ) AS genre, m.release_date, m.runtime
 	FROM movies m 
+	WHERE TO_CHAR(m.release_date, 'YYYY-MM') = $1
 	ORDER BY created_at DESC
-	LIMIT $1 OFFSET $2;`
-	rows, err := conn.Query(context.Background(), query, limit, offset)
+	LIMIT $2 OFFSET $3;`
+	rows, err := conn.Query(context.Background(), query, releaseMonth, limit, offset)
 	if err != nil {
 		return []CreatedMovies{}, 0, err
 	}
@@ -121,9 +122,9 @@ func GetAllMoviesCreated(limit, offset int) ([]CreatedMovies, int, error) {
 		return []CreatedMovies{}, 0, err
 	}
 
-	Count := `SELECT COUNT(*)	FROM movies`
+	Count := `SELECT COUNT(*)	FROM movies WHERE TO_CHAR(release_date, 'YYYY-MM') = $1`
 	var totalMovies int
-	err = conn.QueryRow(context.Background(), Count).Scan(&totalMovies)
+	err = conn.QueryRow(context.Background(), Count, releaseMonth).Scan(&totalMovies)
 	if err != nil {
 		return []CreatedMovies{}, 0, err
 	}

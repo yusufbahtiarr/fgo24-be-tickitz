@@ -28,14 +28,20 @@
                 "summary": "Get All Movies Created by Admin",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Filter by Release Month (e.g., 2025-07)",
+                        "name": "release_month",
+                        "in": "query"
+                    },
+                    {
                         "type": "integer",
-                        "description": "Page",
+                        "description": "Page (e.g., 1)",
                         "name": "page",
                         "in": "query"
                     },
                     {
                         "type": "integer",
-                        "description": "Items per page (5)",
+                        "description": "Items per page (e.g., 5)",
                         "name": "limit",
                         "in": "query"
                     }

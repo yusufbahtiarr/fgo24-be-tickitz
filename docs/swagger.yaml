@@ -250,11 +250,15 @@ paths:
       - application/json
       description: Retrieve the list of all movies created through the admin panel
       parameters:
-      - description: Page
+      - description: Filter by Release Month (e.g., 2025-07)
+        in: query
+        name: release_month
+        type: string
+      - description: Page (e.g., 1)
         in: query
         name: page
         type: integer
-      - description: Items per page (5)
+      - description: Items per page (e.g., 5)
         in: query
         name: limit
         type: integer
