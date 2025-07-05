@@ -60,15 +60,15 @@ func GetNowShowingMoviesHandler(ctx *gin.Context) {
 	})
 }
 
-// @Summary      List Movies
-// @Description  Get list of movies with optional search by title and pagination
+// @Summary      Get list of movies
+// @Description  Retrieve a list of movies with optional filters such as title search, sorting, and pagination.
 // @Tags         Movies
 // @Accept       json
 // @Produce      json
-// @Param        search query    string  false  "Search by movie title"
-// @Param        genre query    string  false  "Filter by genre"
+// @Param        search query    string  false  "Search movies by title"
+// @Param        genre query    string  false  "Filter movies by genre"
+// @Param        sort query    string  false  "Sorting by field (e.g., popular, latest, title_asc, title_desc)"
 // @Param        page   query    int     false  "Page"
-// @Param        limit  query    int     false  "Items per page (5)"
 // @Success      200    {object} utils.Response{results=[]models.Movie,page_info=utils.PageInfo}
 // @Failure      400    {object} utils.Response
 // @Failure      404    {object} utils.Response
@@ -77,8 +77,8 @@ func GetNowShowingMoviesHandler(ctx *gin.Context) {
 func GetListMoviesHandler(ctx *gin.Context) {
 	searchTitle := ctx.Query("search")
 	genre := ctx.Query("genre")
+	sort := ctx.Query("sort")
 	pageX := ctx.DefaultQuery("page", "1")
-	limitX := ctx.DefaultQuery("limit", "5")
 
 	page, err := strconv.Atoi(pageX)
 	if err != nil || page < 1 {
@@ -89,18 +89,10 @@ func GetListMoviesHandler(ctx *gin.Context) {
 		return
 	}
 
-	limit, err := strconv.Atoi(limitX)
-	if err != nil || limit < 1 {
-		ctx.JSON(http.StatusBadRequest, utils.Response{
-			Success: false,
-			Message: "Invalid limit number. Limit must be a positive integer.",
-		})
-		return
-	}
-
+	limit := 10
 	offset := (page - 1) * limit
 
-	movies, totalMovies, err := models.GetListMovies(searchTitle, genre, limit, offset)
+	movies, totalMovies, err := models.GetListMovies(searchTitle, genre, sort, limit, offset)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, utils.Response{
@@ -140,6 +132,7 @@ func GetListMoviesHandler(ctx *gin.Context) {
 // @Param        id   path      int  true  "Movie ID"
 // @Success      200  {object}  models.Movie
 // @Failure      404  {object}  utils.Response
+// @Failure      500  {object}  utils.Response
 // @Router       /movies/{id} [get]
 func GetMovieByIDHandler(ctx *gin.Context) {
 	idx := ctx.Param("id")

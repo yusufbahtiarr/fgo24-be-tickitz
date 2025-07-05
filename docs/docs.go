@@ -553,7 +553,7 @@ const docTemplate = `{
         },
         "/movies": {
             "get": {
-                "description": "Get list of movies with optional search by title and pagination",
+                "description": "Retrieve a list of movies with optional filters such as title search, sorting, and pagination.",
                 "consumes": [
                     "application/json"
                 ],
@@ -563,30 +563,30 @@ const docTemplate = `{
                 "tags": [
                     "Movies"
                 ],
-                "summary": "List Movies",
+                "summary": "Get list of movies",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Search by movie title",
+                        "description": "Search movies by title",
                         "name": "search",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Filter by genre",
+                        "description": "Filter movies by genre",
                         "name": "genre",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sorting by field (e.g., popular, latest, title_asc, title_desc)",
+                        "name": "sort",
                         "in": "query"
                     },
                     {
                         "type": "integer",
                         "description": "Page",
                         "name": "page",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Items per page (5)",
-                        "name": "limit",
                         "in": "query"
                     }
                 ],
@@ -731,6 +731,12 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/utils.Response"
                         }

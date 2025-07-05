@@ -618,23 +618,24 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get list of movies with optional search by title and pagination
+      description: Retrieve a list of movies with optional filters such as title search,
+        sorting, and pagination.
       parameters:
-      - description: Search by movie title
+      - description: Search movies by title
         in: query
         name: search
         type: string
-      - description: Filter by genre
+      - description: Filter movies by genre
         in: query
         name: genre
+        type: string
+      - description: Sorting by field (e.g., popular, latest, title_asc, title_desc)
+        in: query
+        name: sort
         type: string
       - description: Page
         in: query
         name: page
-        type: integer
-      - description: Items per page (5)
-        in: query
-        name: limit
         type: integer
       produces:
       - application/json
@@ -664,7 +665,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.Response'
-      summary: List Movies
+      summary: Get list of movies
       tags:
       - Movies
   /movies/{id}:
@@ -687,6 +688,10 @@ paths:
             $ref: '#/definitions/models.Movie'
         "404":
           description: Not Found
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.Response'
       summary: Get Movie By ID
