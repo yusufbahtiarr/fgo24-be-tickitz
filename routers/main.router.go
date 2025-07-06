@@ -14,6 +14,7 @@ func CombineGroup(r *gin.Engine) {
 	authRouter(r.Group("/auth"))
 	userRouter(r.Group("/user"))
 	movieRouter(r.Group("/movies"))
+	transactionRouter(r.Group("/transactions"))
 
 	docs.SwaggerInfo.BasePath = "/"
 	r.GET("/docs", func(ctx *gin.Context) {

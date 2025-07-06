@@ -194,6 +194,21 @@ definitions:
       title:
         type: string
     type: object
+  models.TicketResult:
+    properties:
+      movie_date:
+        type: string
+      movie_title:
+        type: string
+      seat_count:
+        type: integer
+      seats:
+        type: string
+      show_time:
+        type: string
+      total_payment:
+        type: integer
+    type: object
   models.Transaction:
     properties:
       cinema:
@@ -739,6 +754,114 @@ paths:
       summary: Get Upcoming Movies
       tags:
       - Movies
+  /transactions/{transaction_id}/ticket:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve the ticket details for a specific transaction ID, accessible
+        only by the authenticated user.
+      parameters:
+      - description: Transaction ID
+        in: query
+        name: transaction_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                results:
+                  $ref: '#/definitions/models.TicketResult'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Get Ticket Result by Transaction ID
+      tags:
+      - Transactions
+  /transactions/booked-seats:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of already booked seats based on movie, date, time,
+        location, and studio.
+      parameters:
+      - description: Movie ID
+        in: query
+        name: movie_id
+        required: true
+        type: integer
+      - description: Movie date in format YYYY-MM-DD
+        in: query
+        name: date
+        required: true
+        type: string
+      - description: Time ID
+        in: query
+        name: time_id
+        required: true
+        type: integer
+      - description: Location ID
+        in: query
+        name: location_id
+        required: true
+        type: integer
+      - description: Cinema ID
+        in: query
+        name: cinema_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                results:
+                  items:
+                    type: string
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Get Booked Seats Info
+      tags:
+      - Transactions
   /user/profile:
     get:
       consumes:
