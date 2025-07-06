@@ -11,4 +11,5 @@ func transactionRouter(r *gin.RouterGroup) {
 	r.Use(middlewares.VerifyToken())
 	r.GET("/:id/ticket", controllers.GetTicketResultHandler)
 	r.GET("/booked-seats", controllers.GetBookedSeatsInfoHandler)
+	r.POST("", controllers.CreateTransactionHandler)
 }

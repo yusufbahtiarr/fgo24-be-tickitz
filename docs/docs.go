@@ -744,6 +744,63 @@ const docTemplate = `{
                 }
             }
         },
+        "/transactions": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new transaction with seat selection for movie booking",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Create new transaction",
+                "parameters": [
+                    {
+                        "description": "Transaction payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateTransactionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/transactions/booked-seats": {
             "get": {
                 "security": [
@@ -1129,6 +1186,47 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.CreateTransactionRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id_cinema": {
+                    "type": "integer"
+                },
+                "id_location": {
+                    "type": "integer"
+                },
+                "id_movie": {
+                    "type": "integer"
+                },
+                "id_payment_methods": {
+                    "type": "integer"
+                },
+                "id_time": {
+                    "type": "integer"
+                },
+                "movie_date": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "seats": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "total_payment": {
+                    "type": "integer"
+                }
+            }
+        },
         "dto.ForgotPasswordRequest": {
             "type": "object",
             "required": [
@@ -1420,9 +1518,6 @@ const docTemplate = `{
                 },
                 "total_payment": {
                     "type": "integer"
-                },
-                "virtual_account": {
-                    "type": "string"
                 }
             }
         },

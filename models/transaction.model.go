@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"fgo24-be-tickitz/db"
+	"fgo24-be-tickitz/dto"
 	"fmt"
 	"time"
 )
@@ -95,4 +96,110 @@ func GetBookedSeatsInfo(movieID int, date string, timeID, locationID, cinemaID i
 	}
 
 	return seats, nil
+}
+
+func CreateTransaction(userId int, NewTransaction dto.CreateTransactionRequest) error {
+	conn, err := db.ConnectDB()
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	ctx := context.Background()
+
+	if len(NewTransaction.Seats) == 0 {
+		return fmt.Errorf("seats cannot be empty")
+	}
+	if NewTransaction.TotalPayment <= 0 {
+		return fmt.Errorf("total payment must be greater than 0")
+	}
+
+	var bookedSeats []string
+	queryCheck := `
+		SELECT td.seat
+		FROM transaction_details td
+		JOIN transactions t ON t.id = td.id_transaction
+		WHERE 
+			t.id_movie = $1 AND	
+			t.movie_date = $2 AND	
+			t.id_time = $3 AND	
+			t.id_cinema = $4 AND	
+			t.id_location = $5 AND	
+			td.seat = ANY($6::text[])
+	`
+
+	rows, err := conn.Query(ctx, queryCheck,
+		NewTransaction.MovieID,
+		NewTransaction.MovieDate,
+		NewTransaction.TimeID,
+		NewTransaction.CinemaID,
+		NewTransaction.LocationID,
+		NewTransaction.Seats,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to check existing booked seats: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var seat string
+		if err = rows.Scan(&seat); err != nil {
+			return fmt.Errorf("failed to find booked seat: %w", err)
+		}
+		bookedSeats = append(bookedSeats, seat)
+	}
+
+	if len(bookedSeats) > 0 {
+		return fmt.Errorf("seats already booked: %v", bookedSeats)
+	}
+
+	trx, err := conn.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+
+	succesed := false
+	defer func() {
+		if !succesed {
+			trx.Rollback(ctx)
+		}
+	}()
+
+	query := `
+		INSERT INTO transactions 
+		(name, email, phone, total_payment, movie_date, id_movie, id_cinema, id_time, id_location, id_payment_method, id_user)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id;
+	`
+	var transactionID int
+	err = trx.QueryRow(ctx, query,
+		NewTransaction.Name,
+		NewTransaction.Email,
+		NewTransaction.Phone,
+		NewTransaction.TotalPayment,
+		NewTransaction.MovieDate,
+		NewTransaction.MovieID,
+		NewTransaction.CinemaID,
+		NewTransaction.TimeID,
+		NewTransaction.LocationID,
+		NewTransaction.PaymentMethodID,
+		userId,
+	).Scan(&transactionID)
+	if err != nil {
+		return fmt.Errorf("failed to insert transaction: %w", err)
+	}
+
+	for _, seat := range NewTransaction.Seats {
+		_, err := trx.Exec(ctx, "INSERT INTO transaction_details (id_transaction, seat) VALUES ($1, $2)", transactionID, seat)
+		if err != nil {
+			return fmt.Errorf("failed to insert seat '%s' into transaction detail: %w", seat, err)
+		}
+	}
+
+	if err := trx.Commit(ctx); err != nil {
+		return fmt.Errorf("failed to commit transaction")
+	}
+	succesed = true
+
+	return nil
+
 }

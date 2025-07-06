@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fgo24-be-tickitz/dto"
 	"fgo24-be-tickitz/models"
 	"fgo24-be-tickitz/utils"
 	"net/http"
@@ -159,4 +160,70 @@ func GetBookedSeatsInfoHandler(ctx *gin.Context) {
 		Message: "Success get booked seat info",
 		Results: seats,
 	})
+}
+
+// @Summary      Create new transaction
+// @Description  Create a new transaction with seat selection for movie booking
+// @Tags         Transactions
+// @Accept       json
+// @Produce      json
+// @Param        request body dto.CreateTransactionRequest true "Transaction payload"
+// @Success      201 {object} utils.Response
+// @Failure      400 {object} utils.Response
+// @Failure      401 {object} utils.Response
+// @Failure      500 {object} utils.Response
+// @Security     BearerAuth
+// @Router       /transactions [post]
+func CreateTransactionHandler(ctx *gin.Context) {
+	userIdx, exists := ctx.Get("userId")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, utils.Response{
+			Success: false,
+			Message: "Unauthorized: user ID not found",
+		})
+		return
+	}
+
+	userIdStr, ok := userIdx.(string)
+	if !ok {
+		ctx.JSON(http.StatusInternalServerError, utils.Response{
+			Success: false,
+			Message: "Invalid user ID format in token",
+		})
+		return
+	}
+
+	userId, err := strconv.Atoi(userIdStr)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, utils.Response{
+			Success: false,
+			Message: "Failed to parse user ID",
+		})
+		return
+	}
+
+	transaction := dto.CreateTransactionRequest{}
+
+	if err = ctx.ShouldBindJSON(&transaction); err != nil {
+		ctx.JSON(http.StatusBadRequest, utils.Response{
+			Success: false,
+			Message: "Invalid request transaction",
+		})
+		return
+	}
+
+	err = models.CreateTransaction(userId, transaction)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, utils.Response{
+			Success: false,
+			Message: "Failed Create Transaction",
+			Errors:  err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, utils.Response{
+		Success: true,
+		Message: "Success Create Transaction",
+		Results: transaction})
 }

@@ -40,6 +40,33 @@ definitions:
     - runtime
     - title
     type: object
+  dto.CreateTransactionRequest:
+    properties:
+      email:
+        type: string
+      id_cinema:
+        type: integer
+      id_location:
+        type: integer
+      id_movie:
+        type: integer
+      id_payment_methods:
+        type: integer
+      id_time:
+        type: integer
+      movie_date:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+      seats:
+        items:
+          type: string
+        type: array
+      total_payment:
+        type: integer
+    type: object
   dto.ForgotPasswordRequest:
     properties:
       email:
@@ -235,8 +262,6 @@ definitions:
         type: string
       total_payment:
         type: integer
-      virtual_account:
-        type: string
     type: object
   models.UpcomingMovie:
     properties:
@@ -754,6 +779,42 @@ paths:
       summary: Get Upcoming Movies
       tags:
       - Movies
+  /transactions:
+    post:
+      consumes:
+      - application/json
+      description: Create a new transaction with seat selection for movie booking
+      parameters:
+      - description: Transaction payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateTransactionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Create new transaction
+      tags:
+      - Transactions
   /transactions/{transaction_id}/ticket:
     get:
       consumes:
