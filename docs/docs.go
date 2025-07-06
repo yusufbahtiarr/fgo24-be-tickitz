@@ -1293,6 +1293,9 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "backdrop_url",
+                "casts",
+                "directors",
+                "genres",
                 "overview",
                 "poster_url",
                 "rating",
@@ -1303,6 +1306,24 @@ const docTemplate = `{
             "properties": {
                 "backdrop_url": {
                     "type": "string"
+                },
+                "casts": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "directors": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "genres": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "overview": {
                     "type": "string"

@@ -192,17 +192,27 @@ func DeleteMovie(id int) error {
 	return nil
 }
 
-func UpdateMovie(id int, newData dto.UpdateMovieRequest) error {
+func UpdateMovie(idMovie int, newData dto.UpdateMovieRequest) error {
 	conn, err := db.ConnectDB()
 	if err != nil {
 		return err
 	}
 	defer conn.Close()
 
-	oldData := dto.UpdateMovieRequest{}
+	ctx := context.Background()
+	trx, err := conn.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer func() {
+		if err != nil {
+			_ = trx.Rollback(ctx)
+		}
+	}()
 
+	oldData := dto.UpdateMovieRequest{}
 	query := `SELECT title, backdrop_url, poster_url, release_date, runtime, overview, rating FROM movies WHERE id = $1`
-	err = conn.QueryRow(context.Background(), query, id).Scan(
+	err = trx.QueryRow(ctx, query, idMovie).Scan(
 		&oldData.Title,
 		&oldData.BackdropUrl,
 		&oldData.PosterUrl,
@@ -212,7 +222,7 @@ func UpdateMovie(id int, newData dto.UpdateMovieRequest) error {
 		&oldData.Rating,
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to select old movie(%w)", err)
 	}
 
 	if newData.Title == "" &&
@@ -221,7 +231,10 @@ func UpdateMovie(id int, newData dto.UpdateMovieRequest) error {
 		newData.ReleaseDate.IsZero() &&
 		newData.Runtime == 0 &&
 		newData.Overview == "" &&
-		newData.Rating == 0 {
+		newData.Rating == 0 &&
+		len(newData.Genres) == 0 &&
+		len(newData.Casts) == 0 &&
+		len(newData.Directors) == 0 {
 		return fmt.Errorf("input data must not be empty")
 	}
 
@@ -247,9 +260,9 @@ func UpdateMovie(id int, newData dto.UpdateMovieRequest) error {
 		oldData.Rating = newData.Rating
 	}
 
-	_, err = conn.Exec(context.Background(), `
+	_, err = trx.Exec(ctx, `
 	UPDATE movies 
-	SET poster_url = $1, backdrop_url = $2, title = $3, release_date = $4, runtime = $5, overview = $6, rating = $7 
+	SET poster_url = $1, backdrop_url = $2, title = $3, release_date = $4, runtime = $5, overview = $6, rating = $7, updated_at = now()
 	WHERE id = $8`,
 		oldData.PosterUrl,
 		oldData.BackdropUrl,
@@ -258,8 +271,41 @@ func UpdateMovie(id int, newData dto.UpdateMovieRequest) error {
 		oldData.Runtime,
 		oldData.Overview,
 		oldData.Rating,
-		id,
+		idMovie,
 	)
+	if err != nil {
+		return fmt.Errorf("failed to update movie(%w)", err)
+	}
 
-	return err
+	if _, err = trx.Exec(ctx, `DELETE FROM movie_genres WHERE id_movie = $1`, idMovie); err != nil {
+		return fmt.Errorf("failed to delete old movie genres (%w)", err)
+	}
+	if _, err = trx.Exec(ctx, `DELETE FROM movie_casts WHERE id_movie = $1`, idMovie); err != nil {
+		return fmt.Errorf("failed to delete old movie casts (%w)", err)
+	}
+	if _, err = trx.Exec(ctx, `DELETE FROM movie_directors WHERE id_movie = $1`, idMovie); err != nil {
+		return fmt.Errorf("failed to delete old movie directors (%w)", err)
+	}
+
+	for _, id_genre := range newData.Genres {
+		if _, err = trx.Exec(ctx, `INSERT INTO movie_genres (id_movie, id_genre) VALUES ($1, $2)`, idMovie, id_genre); err != nil {
+			return fmt.Errorf("failed to insert movie genres (%w)", err)
+		}
+	}
+	for _, id_cast := range newData.Casts {
+		if _, err = trx.Exec(ctx, `INSERT INTO movie_casts (id_movie, id_cast) VALUES ($1, $2)`, idMovie, id_cast); err != nil {
+			return fmt.Errorf("failed to insert movie casts (%w)", err)
+		}
+	}
+	for _, id_director := range newData.Directors {
+		if _, err = trx.Exec(ctx, `INSERT INTO movie_directors (id_movie, id_director) VALUES ($1, $2)`, idMovie, id_director); err != nil {
+			return fmt.Errorf("failed to insert movie directors (%w)", err)
+		}
+	}
+
+	if err = trx.Commit(ctx); err != nil {
+		return err
+	}
+
+	return nil
 }

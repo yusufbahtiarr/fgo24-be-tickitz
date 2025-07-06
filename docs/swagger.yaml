@@ -113,6 +113,18 @@ definitions:
     properties:
       backdrop_url:
         type: string
+      casts:
+        items:
+          type: integer
+        type: array
+      directors:
+        items:
+          type: integer
+        type: array
+      genres:
+        items:
+          type: integer
+        type: array
       overview:
         type: string
       poster_url:
@@ -127,6 +139,9 @@ definitions:
         type: string
     required:
     - backdrop_url
+    - casts
+    - directors
+    - genres
     - overview
     - poster_url
     - rating
