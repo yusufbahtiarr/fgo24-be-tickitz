@@ -55,7 +55,7 @@ func CreateMovieHandler(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, utils.Response{
+	ctx.JSON(http.StatusCreated, utils.Response{
 		Success: true,
 		Message: "Success Create Movie",
 		Results: map[string]string{
