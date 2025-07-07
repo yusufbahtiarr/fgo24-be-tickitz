@@ -17,7 +17,33 @@ type TicketResult struct {
 	TotalPayment int       `json:"total_payment"`
 }
 
-type Seat string
+type TransactionResult struct {
+	Name          string        `json:"name"`
+	Email         string        `json:"email"`
+	Phone         string        `json:"phone"`
+	TotalPayment  string        `json:"total_payment"`
+	MovieDate     FormattedDate `json:"movie_date"`
+	Title         string        `json:"title"`
+	CinemaName    string        `json:"cinema_name"`
+	Time          FormattedTime `json:"time"`
+	Location      string        `json:"location"`
+	PaymentMethod string        `json:"payment_method"`
+}
+
+type FormattedDate time.Time
+type FormattedTime time.Time
+
+func (d FormattedDate) MarshalJSON() ([]byte, error) {
+	t := time.Time(d)
+	formatted := fmt.Sprintf("\"%s\"", t.Format("2006-01-02"))
+	return []byte(formatted), nil
+}
+
+func (t FormattedTime) MarshalJSON() ([]byte, error) {
+	tt := time.Time(t)
+	formatted := fmt.Sprintf("\"%s\"", tt.Format("15:04:05"))
+	return []byte(formatted), nil
+}
 
 func GetTicketResult(transactionId, userId int) (TicketResult, error) {
 	conn, err := db.ConnectDB()
@@ -98,20 +124,20 @@ func GetBookedSeatsInfo(movieID int, date string, timeID, locationID, cinemaID i
 	return seats, nil
 }
 
-func CreateTransaction(userId int, NewTransaction dto.CreateTransactionRequest) error {
+func CreateTransaction(userId int, NewTransaction dto.CreateTransactionRequest) (TransactionResult, error) {
 	conn, err := db.ConnectDB()
 	if err != nil {
-		return err
+		return TransactionResult{}, err
 	}
 	defer conn.Close()
 
 	ctx := context.Background()
 
 	if len(NewTransaction.Seats) == 0 {
-		return fmt.Errorf("seats cannot be empty")
+		return TransactionResult{}, fmt.Errorf("seats cannot be empty")
 	}
 	if NewTransaction.TotalPayment <= 0 {
-		return fmt.Errorf("total payment must be greater than 0")
+		return TransactionResult{}, fmt.Errorf("total payment must be greater than 0")
 	}
 
 	var bookedSeats []string
@@ -137,25 +163,25 @@ func CreateTransaction(userId int, NewTransaction dto.CreateTransactionRequest) 
 		NewTransaction.Seats,
 	)
 	if err != nil {
-		return fmt.Errorf("failed to check existing booked seats: %w", err)
+		return TransactionResult{}, fmt.Errorf("failed to check existing booked seats: %w", err)
 	}
 	defer rows.Close()
 
 	for rows.Next() {
 		var seat string
 		if err = rows.Scan(&seat); err != nil {
-			return fmt.Errorf("failed to find booked seat: %w", err)
+			return TransactionResult{}, fmt.Errorf("failed to find booked seat: %w", err)
 		}
 		bookedSeats = append(bookedSeats, seat)
 	}
 
 	if len(bookedSeats) > 0 {
-		return fmt.Errorf("seats already booked: %v", bookedSeats)
+		return TransactionResult{}, fmt.Errorf("seats already booked: %v", bookedSeats)
 	}
 
 	trx, err := conn.Begin(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to begin transaction: %w", err)
+		return TransactionResult{}, fmt.Errorf("failed to begin transaction: %w", err)
 	}
 
 	succesed := false
@@ -185,21 +211,51 @@ func CreateTransaction(userId int, NewTransaction dto.CreateTransactionRequest) 
 		userId,
 	).Scan(&transactionID)
 	if err != nil {
-		return fmt.Errorf("failed to insert transaction: %w", err)
+		return TransactionResult{}, fmt.Errorf("failed to insert transaction: %w", err)
 	}
 
 	for _, seat := range NewTransaction.Seats {
-		_, err := trx.Exec(ctx, "INSERT INTO transaction_details (id_transaction, seat) VALUES ($1, $2)", transactionID, seat)
+		_, err = trx.Exec(ctx, "INSERT INTO transaction_details (id_transaction, seat) VALUES ($1, $2)", transactionID, seat)
 		if err != nil {
-			return fmt.Errorf("failed to insert seat '%s' into transaction detail: %w", seat, err)
+			return TransactionResult{}, fmt.Errorf("failed to insert seat '%s' into transaction detail: %w", seat, err)
 		}
 	}
+	var result TransactionResult
+	query2 := `SELECT t.name, t.email, t.phone, t.total_payment, t.movie_date, m.title, c.cinema_name, tm.time, l.location, pm.payment_method 
+	FROM transactions t 
+	JOIN movies m ON m.id = t.id_movie
+	JOIN cinemas c ON c.id = t.id_cinema
+	JOIN times tm ON tm.id = t.id_time
+	JOIN locations l ON l.id = t.id_location
+	JOIN payment_methods pm ON pm.id = t.id_payment_method
+	WHERE t.id = $1`
+
+	var movieDate time.Time
+	var showTime time.Time
+	err = trx.QueryRow(ctx, query2, transactionID).Scan(
+		&result.Name,
+		&result.Email,
+		&result.Phone,
+		&result.TotalPayment,
+		&movieDate,
+		&result.Title,
+		&result.CinemaName,
+		&showTime,
+		&result.Location,
+		&result.PaymentMethod,
+	)
+	if err != nil {
+		return TransactionResult{}, err
+	}
+
+	result.MovieDate = FormattedDate(movieDate)
+	result.Time = FormattedTime(showTime)
 
 	if err := trx.Commit(ctx); err != nil {
-		return fmt.Errorf("failed to commit transaction")
+		return TransactionResult{}, fmt.Errorf("failed to commit transaction")
 	}
 	succesed = true
 
-	return nil
+	return result, nil
 
 }

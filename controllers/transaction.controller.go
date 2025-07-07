@@ -168,7 +168,7 @@ func GetBookedSeatsInfoHandler(ctx *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Param        request body dto.CreateTransactionRequest true "Transaction payload"
-// @Success      201 {object} utils.Response
+// @Success      201 {object} utils.Response{results=models.TransactionResult}
 // @Failure      400 {object} utils.Response
 // @Failure      401 {object} utils.Response
 // @Failure      500 {object} utils.Response
@@ -212,7 +212,7 @@ func CreateTransactionHandler(ctx *gin.Context) {
 		return
 	}
 
-	err = models.CreateTransaction(userId, transaction)
+	result, err := models.CreateTransaction(userId, transaction)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, utils.Response{
 			Success: false,
@@ -225,5 +225,6 @@ func CreateTransactionHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, utils.Response{
 		Success: true,
 		Message: "Success Create Transaction",
-		Results: transaction})
+		Results: result,
+	})
 }

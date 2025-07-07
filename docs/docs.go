@@ -45,12 +45,6 @@ const docTemplate = `{
                         "description": "Page (e.g., 1)",
                         "name": "page",
                         "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Items per page (e.g., 5)",
-                        "name": "limit",
-                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -777,7 +771,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/utils.Response"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/utils.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "results": {
+                                            "$ref": "#/definitions/models.TransactionResult"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -1201,7 +1207,7 @@ const docTemplate = `{
                 "id_movie": {
                     "type": "integer"
                 },
-                "id_payment_methods": {
+                "id_payment_method": {
                     "type": "integer"
                 },
                 "id_time": {
@@ -1291,18 +1297,6 @@ const docTemplate = `{
         },
         "dto.UpdateMovieRequest": {
             "type": "object",
-            "required": [
-                "backdrop_url",
-                "casts",
-                "directors",
-                "genres",
-                "overview",
-                "poster_url",
-                "rating",
-                "release_date",
-                "runtime",
-                "title"
-            ],
             "properties": {
                 "backdrop_url": {
                     "type": "string"
@@ -1372,7 +1366,10 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "genre": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "id": {
                     "type": "integer"
@@ -1404,7 +1401,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "genre": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "id": {
                     "type": "integer"
@@ -1431,6 +1431,24 @@ const docTemplate = `{
             "properties": {
                 "backdrop_url": {
                     "type": "string"
+                },
+                "cast": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "director": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "genre": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "id": {
                     "type": "integer"
@@ -1459,7 +1477,10 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "genre": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "id": {
                     "type": "integer"
@@ -1542,11 +1563,49 @@ const docTemplate = `{
                 }
             }
         },
+        "models.TransactionResult": {
+            "type": "object",
+            "properties": {
+                "cinema_name": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "location": {
+                    "type": "string"
+                },
+                "movie_date": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "payment_method": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "time": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "total_payment": {
+                    "type": "string"
+                }
+            }
+        },
         "models.UpcomingMovie": {
             "type": "object",
             "properties": {
                 "genre": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "id": {
                     "type": "integer"

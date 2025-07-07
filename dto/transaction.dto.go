@@ -6,7 +6,7 @@ type CreateTransactionRequest struct {
 	TimeID          int      `json:"id_time"`
 	LocationID      int      `json:"id_location"`
 	CinemaID        int      `json:"id_cinema"`
-	PaymentMethodID int      `json:"id_payment_methods"`
+	PaymentMethodID int      `json:"id_payment_method"`
 	TotalPayment    int      `json:"total_payment"`
 	Name            string   `json:"name"`
 	Email           string   `json:"email"`

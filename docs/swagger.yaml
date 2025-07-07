@@ -50,7 +50,7 @@ definitions:
         type: integer
       id_movie:
         type: integer
-      id_payment_methods:
+      id_payment_method:
         type: integer
       id_time:
         type: integer
@@ -137,17 +137,6 @@ definitions:
         type: integer
       title:
         type: string
-    required:
-    - backdrop_url
-    - casts
-    - directors
-    - genres
-    - overview
-    - poster_url
-    - rating
-    - release_date
-    - runtime
-    - title
     type: object
   dto.UpdateProfileRequest:
     properties:
@@ -167,7 +156,9 @@ definitions:
   models.CreatedMovies:
     properties:
       genre:
-        type: string
+        items:
+          type: string
+        type: array
       id:
         type: integer
       poster_url:
@@ -188,7 +179,9 @@ definitions:
       director:
         type: string
       genre:
-        type: string
+        items:
+          type: string
+        type: array
       id:
         type: integer
       overview:
@@ -206,6 +199,18 @@ definitions:
     properties:
       backdrop_url:
         type: string
+      cast:
+        items:
+          type: string
+        type: array
+      director:
+        items:
+          type: string
+        type: array
+      genre:
+        items:
+          type: string
+        type: array
       id:
         type: integer
       overview:
@@ -224,7 +229,9 @@ definitions:
   models.NowShowingMovie:
     properties:
       genre:
-        type: string
+        items:
+          type: string
+        type: array
       id:
         type: integer
       poster_url:
@@ -278,10 +285,35 @@ definitions:
       total_payment:
         type: integer
     type: object
+  models.TransactionResult:
+    properties:
+      cinema_name:
+        type: string
+      email:
+        type: string
+      location:
+        type: string
+      movie_date:
+        type: string
+      name:
+        type: string
+      payment_method:
+        type: string
+      phone:
+        type: string
+      time:
+        type: string
+      title:
+        type: string
+      total_payment:
+        type: string
+    type: object
   models.UpcomingMovie:
     properties:
       genre:
-        type: string
+        items:
+          type: string
+        type: array
       id:
         type: integer
       poster_url:
@@ -341,10 +373,6 @@ paths:
       - description: Page (e.g., 1)
         in: query
         name: page
-        type: integer
-      - description: Items per page (e.g., 5)
-        in: query
-        name: limit
         type: integer
       produces:
       - application/json
@@ -812,7 +840,12 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/utils.Response'
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                results:
+                  $ref: '#/definitions/models.TransactionResult'
+              type: object
         "400":
           description: Bad Request
           schema:
