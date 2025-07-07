@@ -175,9 +175,13 @@ definitions:
       backdrop_url:
         type: string
       cast:
-        type: string
+        items:
+          type: string
+        type: array
       director:
-        type: string
+        items:
+          type: string
+        type: array
       genre:
         items:
           type: string

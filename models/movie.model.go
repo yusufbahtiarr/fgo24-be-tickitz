@@ -14,7 +14,7 @@ type UpcomingMovie struct {
 	PosterURL   string    `json:"poster_url"`
 	Title       string    `json:"title"`
 	ReleaseDate time.Time `json:"release_date"`
-	Genre       *string   `json:"genre"`
+	Genre       []string  `json:"genre"`
 }
 
 type NowShowingMovie struct {
@@ -22,8 +22,8 @@ type NowShowingMovie struct {
 	PosterURL   string    `json:"poster_url"`
 	Title       string    `json:"title"`
 	ReleaseDate time.Time `json:"release_date"`
-	Genre       *string   `json:"genre"`
-	Rating      float32   `json:"rating"`
+	Genre       []string  `json:"genre"`
+	Rating      float64   `json:"rating"`
 }
 
 type Movie struct {
@@ -37,7 +37,7 @@ type Movie struct {
 	Director    []string  `json:"director"`
 	Runtime     int       `json:"runtime"`
 	Overview    string    `json:"overview"`
-	Rating      float32   `json:"rating"`
+	Rating      float64   `json:"rating"`
 }
 
 type Movies []Movie
@@ -51,7 +51,7 @@ func GetUpcomingMovies() ([]UpcomingMovie, error) {
 
 	query2 := `SELECT m.id, m.poster_url, m.title, m.release_date,
   (
-    SELECT STRING_AGG(g.genre_name, ', ') 
+    SELECT ARRAY_AGG(g.genre_name) 
     FROM movie_genres mg
     JOIN genres g ON g.id = mg.id_genre
     WHERE mg.id_movie = m.id
@@ -80,7 +80,7 @@ func GetNowShowingMovies() ([]NowShowingMovie, error) {
 
 	query := `SELECT m.id, m.poster_url, m.title, m.release_date,
 	(
-		SELECT STRING_AGG(g.genre_name, ', ')
+		SELECT ARRAY_AGG(g.genre_name)
 		FROM movie_genres mg
 		JOIN genres g ON g.id = mg.id_genre
 		WHERE mg.id_movie = m.id
@@ -127,11 +127,24 @@ func GetListMovies(title, genre, sort string, limit, offset int) (Movies, int, e
 	query := fmt.Sprintf(`
 		SELECT m.id, m.poster_url, m.backdrop_url, m.title, m.release_date, 
 		(
-		SELECT STRING_AGG(g.genre_name, ', ')
+		SELECT ARRAY_AGG(g.genre_name)
 		FROM movie_genres mg
 		JOIN genres g ON g.id = mg.id_genre
 		WHERE mg.id_movie = m.id
-	) AS genre, m.runtime, m.overview, m.rating
+	) AS genre, 
+	(
+		SELECT ARRAY_AGG(c.cast_name)
+		FROM movie_casts mc
+		JOIN casts c ON c.id = mc.id_cast
+		WHERE mc.id_movie = m.id
+	) AS cast,
+	 (
+		SELECT ARRAY_AGG(d.director_name)
+		FROM movie_directors md
+		JOIN directors d ON d.id = md.id_director
+		WHERE md.id_movie = m.id
+	) AS director,  	 
+	m.runtime, m.overview, m.rating
 		FROM movies m
 		WHERE m.title ILIKE $1
 		AND (

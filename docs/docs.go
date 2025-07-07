@@ -1395,10 +1395,16 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "cast": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "director": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "genre": {
                     "type": "array",

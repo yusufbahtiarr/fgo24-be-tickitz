@@ -41,6 +41,7 @@ func CreateMovieHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, utils.Response{
 			Success: false,
 			Message: "Invalid request movie",
+			Errors:  err.Error(),
 		})
 		return
 	}
@@ -70,8 +71,7 @@ func CreateMovieHandler(ctx *gin.Context) {
 // @Produce      json
 // @Param        release_month   query    string     false  "Filter by Release Month (e.g., 2025-07)"
 // @Param        page   query    int     false  "Page (e.g., 1)"
-// @Param        limit  query    int     false  "Items per page (e.g., 5)"
-// @Success      200  {object}  utils.Response{results=[]models.CreatedMovies{},page_info=utils.PageInfo}
+// @Success      200  {object}  utils.Response{page_info=utils.PageInfo,results=[]models.CreatedMovies{}}
 // @Failure      400  {object}  utils.Response
 // @Failure      500  {object}  utils.Response
 // @Security     BearerAuth
@@ -138,13 +138,13 @@ func GetAllMoviesCreatedHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, utils.Response{
 		Success: true,
 		Message: "Success show list movies created",
-		Results: movies,
 		PageInfo: &utils.PageInfo{
 			Total:      totalMovies,
 			Page:       page,
 			Limit:      limit,
 			TotalPages: totalPages,
 		},
+		Results: movies,
 	})
 
 }
@@ -299,12 +299,12 @@ func UpdateMovieHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, utils.Response{
 			Success: false,
 			Message: "Invalid input.",
-			Errors:  err.Error(),
+			// Errors:  err.Error(),
 		})
 		return
 	}
 
-	err = models.UpdateMovie(id, newData)
+	updateMovie, err := models.UpdateMovie(id, newData)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, utils.Response{
 			Success: false,
@@ -317,6 +317,6 @@ func UpdateMovieHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, utils.Response{
 		Success: true,
 		Message: "Success update movie",
-		Results: "Update Movie " + newData.Title,
+		Results: updateMovie,
 	})
 }
