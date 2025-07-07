@@ -95,9 +95,7 @@ This WeeklyTask Project, presents an Entity-Relationship Diagram (ERD) for an Ku
     string name
     string email
     sting phone
-    int virtual_account
     int total_payment
-    date transaction_date
     date movie_date
     string status_payment
     string status_ticket
