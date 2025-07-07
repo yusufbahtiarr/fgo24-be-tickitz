@@ -32,6 +32,9 @@ type Movie struct {
 	BackdropURL string    `json:"backdrop_url"`
 	Title       string    `json:"title"`
 	ReleaseDate time.Time `json:"release_date"`
+	Genre       []string  `json:"genre"`
+	Cast        []string  `json:"cast"`
+	Director    []string  `json:"director"`
 	Runtime     int       `json:"runtime"`
 	Overview    string    `json:"overview"`
 	Rating      float32   `json:"rating"`
@@ -122,7 +125,13 @@ func GetListMovies(title, genre, sort string, limit, offset int) (Movies, int, e
 	}
 
 	query := fmt.Sprintf(`
-		SELECT m.id, m.poster_url, m.backdrop_url, m.title, m.release_date, m.runtime, m.overview, m.rating
+		SELECT m.id, m.poster_url, m.backdrop_url, m.title, m.release_date, 
+		(
+		SELECT STRING_AGG(g.genre_name, ', ')
+		FROM movie_genres mg
+		JOIN genres g ON g.id = mg.id_genre
+		WHERE mg.id_movie = m.id
+	) AS genre, m.runtime, m.overview, m.rating
 		FROM movies m
 		WHERE m.title ILIKE $1
 		AND (
@@ -174,15 +183,35 @@ func GetMovieByID(id int) (Movie, error) {
 	}
 	defer conn.Close()
 
-	query := "SELECT id, poster_url, backdrop_url, title, release_date, runtime, overview, rating FROM movies WHERE id = $1"
+	query := `SELECT m.id, m.poster_url, m.backdrop_url, m.title, m.release_date, 
+		(
+		SELECT ARRAY_AGG(g.genre_name)
+		FROM movie_genres mg
+		JOIN genres g ON g.id = mg.id_genre
+		WHERE mg.id_movie = m.id
+	) AS genre, 
+	(
+		SELECT ARRAY_AGG(c.cast_name)
+		FROM movie_casts mc
+		JOIN casts c ON c.id = mc.id_cast
+		WHERE mc.id_movie = m.id
+	) AS cast,
+	 (
+		SELECT ARRAY_AGG(d.director_name)
+		FROM movie_directors md
+		JOIN directors d ON d.id = md.id_director
+		WHERE md.id_movie = m.id
+	) AS director,  
+	m.runtime, m.overview, m.rating
+		FROM movies m WHERE m.id = $1`
+
 	rows, err := conn.Query(context.Background(), query, id)
 	if err != nil {
-		return Movie{}, err
+		return Movie{}, fmt.Errorf("failed query   %w", err)
 	}
-
 	movie, err := pgx.CollectOneRow[Movie](rows, pgx.RowToStructByName)
 	if err != nil {
-		return Movie{}, err
+		return Movie{}, fmt.Errorf("failed query rows  %w", err)
 	}
 
 	return movie, nil

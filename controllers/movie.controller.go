@@ -152,6 +152,7 @@ func GetMovieByIDHandler(ctx *gin.Context) {
 			Message: "Failed to show movies by id",
 			Errors:  err.Error(),
 		})
+		return
 	}
 
 	ctx.JSON(http.StatusOK, utils.Response{
