@@ -1,10 +1,16 @@
 package controllers
 
 import (
+	"context"
+	"encoding/json"
 	"fgo24-be-tickitz/models"
 	"fgo24-be-tickitz/utils"
+	"fmt"
+	"log"
 	"net/http"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx"
@@ -19,6 +25,33 @@ import (
 // @Failure      500  {object}  utils.Response
 // @Router       /movies/upcoming [get]
 func GetUpcomingMoviesHandler(ctx *gin.Context) {
+	err := utils.RedisClient.Ping(context.Background()).Err()
+	noredis := false
+	if err != nil {
+		if strings.Contains(err.Error(), "refused") {
+			noredis = true
+		}
+	}
+
+	if !noredis {
+		result := utils.RedisClient.Exists(context.Background(), ctx.Request.RequestURI)
+		if result.Val() != 0 {
+			movies := models.Movies{}
+			data := utils.RedisClient.Get(context.Background(), ctx.Request.RequestURI)
+			str := data.Val()
+			if err = json.Unmarshal([]byte(str), &movies); err != nil {
+				log.Println("Unmarshal error:", err)
+			} else {
+				ctx.JSON(http.StatusOK, utils.Response{
+					Success: true,
+					Message: "List All Movie (from Redis)",
+					Results: movies,
+				})
+			}
+			return
+		}
+	}
+
 	movies, err := models.GetUpcomingMovies()
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, utils.Response{
@@ -26,6 +59,19 @@ func GetUpcomingMoviesHandler(ctx *gin.Context) {
 			Message: "Internal server error",
 			Errors:  err.Error(),
 		})
+	}
+
+	if !noredis {
+		encoded, err := json.Marshal(movies)
+		if err != nil {
+			fmt.Println(err)
+			ctx.JSON(http.StatusInternalServerError, utils.Response{
+				Success: false,
+				Message: "Failed to get user from database",
+			})
+			return
+		}
+		utils.RedisClient.Set(context.Background(), ctx.Request.RequestURI, string(encoded), 10*time.Minute)
 	}
 
 	ctx.JSON(http.StatusOK, utils.Response{
@@ -44,6 +90,33 @@ func GetUpcomingMoviesHandler(ctx *gin.Context) {
 // @Failure      500  {object}  utils.Response
 // @Router       /movies/now-showing [get]
 func GetNowShowingMoviesHandler(ctx *gin.Context) {
+	err := utils.RedisClient.Ping(context.Background()).Err()
+	noredis := false
+	if err != nil {
+		if strings.Contains(err.Error(), "refused") {
+			noredis = true
+		}
+	}
+
+	if !noredis {
+		result := utils.RedisClient.Exists(context.Background(), ctx.Request.RequestURI)
+		if result.Val() != 0 {
+			movies := models.Movies{}
+			data := utils.RedisClient.Get(context.Background(), ctx.Request.RequestURI)
+			str := data.Val()
+			if err = json.Unmarshal([]byte(str), &movies); err != nil {
+				log.Println("Unmarshal error:", err)
+			} else {
+				ctx.JSON(http.StatusOK, utils.Response{
+					Success: true,
+					Message: "List All Movie (from Redis)",
+					Results: movies,
+				})
+			}
+			return
+		}
+	}
+
 	movies, err := models.GetNowShowingMovies()
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, utils.Response{
@@ -51,6 +124,19 @@ func GetNowShowingMoviesHandler(ctx *gin.Context) {
 			Message: "Internal server error",
 			Errors:  err.Error(),
 		})
+	}
+
+	if !noredis {
+		encoded, err := json.Marshal(movies)
+		if err != nil {
+			fmt.Println(err)
+			ctx.JSON(http.StatusInternalServerError, utils.Response{
+				Success: false,
+				Message: "Failed to get user from database",
+			})
+			return
+		}
+		utils.RedisClient.Set(context.Background(), ctx.Request.RequestURI, string(encoded), 10*time.Minute)
 	}
 
 	ctx.JSON(http.StatusOK, utils.Response{
@@ -69,7 +155,7 @@ func GetNowShowingMoviesHandler(ctx *gin.Context) {
 // @Param        genre query    string  false  "Filter movies by genre"
 // @Param        sort query    string  false  "Sorting by field (e.g., popular, latest, title_asc, title_desc)"
 // @Param        page   query    int     false  "Page"
-// @Success      200    {object} utils.Response{results=[]models.Movie,page_info=utils.PageInfo}
+// @Success      200    {object} utils.Response{page_info=utils.PageInfo,results=[]models.Movie}
 // @Failure      400    {object} utils.Response
 // @Failure      404    {object} utils.Response
 // @Failure      500    {object} utils.Response
@@ -92,6 +178,33 @@ func GetListMoviesHandler(ctx *gin.Context) {
 	limit := 10
 	offset := (page - 1) * limit
 
+	err = utils.RedisClient.Ping(context.Background()).Err()
+	noredis := false
+	if err != nil {
+		if strings.Contains(err.Error(), "refused") {
+			noredis = true
+		}
+	}
+
+	if !noredis {
+		result := utils.RedisClient.Exists(context.Background(), ctx.Request.RequestURI)
+		if result.Val() != 0 {
+			movies := models.Movies{}
+			data := utils.RedisClient.Get(context.Background(), ctx.Request.RequestURI)
+			str := data.Val()
+			if err = json.Unmarshal([]byte(str), &movies); err != nil {
+				log.Println("Unmarshal error:", err)
+			} else {
+				ctx.JSON(http.StatusOK, utils.Response{
+					Success: true,
+					Message: "List All Movie (from Redis)",
+					Results: movies,
+				})
+			}
+			return
+		}
+	}
+
 	movies, totalMovies, err := models.GetListMovies(searchTitle, genre, sort, limit, offset)
 	if err != nil {
 		if err == pgx.ErrNoRows {
@@ -109,18 +222,31 @@ func GetListMoviesHandler(ctx *gin.Context) {
 		return
 	}
 
+	if !noredis {
+		encoded, err := json.Marshal(movies)
+		if err != nil {
+			fmt.Println(err)
+			ctx.JSON(http.StatusInternalServerError, utils.Response{
+				Success: false,
+				Message: "Failed to get user from database",
+			})
+			return
+		}
+		utils.RedisClient.Set(context.Background(), ctx.Request.RequestURI, string(encoded), 10*time.Minute)
+	}
+
 	totalPages := (totalMovies + int(limit) - 1) / int(limit)
 
 	ctx.JSON(http.StatusOK, utils.Response{
 		Success: true,
 		Message: "List Movies",
-		Results: movies,
 		PageInfo: &utils.PageInfo{
 			Total:      totalMovies,
 			Page:       page,
 			Limit:      limit,
 			TotalPages: totalPages,
 		},
+		Results: movies,
 	})
 }
 
@@ -145,6 +271,33 @@ func GetMovieByIDHandler(ctx *gin.Context) {
 		return
 	}
 
+	err = utils.RedisClient.Ping(context.Background()).Err()
+	noredis := false
+	if err != nil {
+		if strings.Contains(err.Error(), "refused") {
+			noredis = true
+		}
+	}
+
+	if !noredis {
+		result := utils.RedisClient.Exists(context.Background(), ctx.Request.RequestURI)
+		if result.Val() != 0 {
+			movie := models.Movie{}
+			data := utils.RedisClient.Get(context.Background(), ctx.Request.RequestURI)
+			str := data.Val()
+			if err = json.Unmarshal([]byte(str), &movie); err != nil {
+				log.Println("Unmarshal error:", err)
+			} else {
+				ctx.JSON(http.StatusOK, utils.Response{
+					Success: true,
+					Message: "List movie by ID (from Redis)",
+					Results: movie,
+				})
+			}
+			return
+		}
+	}
+
 	movie, err := models.GetMovieByID(id)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, utils.Response{
@@ -153,6 +306,19 @@ func GetMovieByIDHandler(ctx *gin.Context) {
 			Errors:  err.Error(),
 		})
 		return
+	}
+
+	if !noredis {
+		encoded, err := json.Marshal(movie)
+		if err != nil {
+			fmt.Println(err)
+			ctx.JSON(http.StatusInternalServerError, utils.Response{
+				Success: false,
+				Message: "Failed to get user from database",
+			})
+			return
+		}
+		utils.RedisClient.Set(context.Background(), ctx.Request.RequestURI, string(encoded), 10*time.Minute)
 	}
 
 	ctx.JSON(http.StatusOK, utils.Response{
