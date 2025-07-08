@@ -486,7 +486,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/auth/reset-password/{token}": {
+        "/auth/reset-password": {
             "post": {
                 "description": "Reset user password using a valid reset token",
                 "consumes": [
@@ -500,13 +500,6 @@ const docTemplate = `{
                 ],
                 "summary": "Reset Password",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Reset token",
-                        "name": "token",
-                        "in": "path",
-                        "required": true
-                    },
                     {
                         "description": "New password data",
                         "name": "body",
@@ -1283,15 +1276,19 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "confirm_password",
-                "password"
+                "new_password",
+                "token"
             ],
             "properties": {
                 "confirm_password": {
                     "type": "string"
                 },
-                "password": {
+                "new_password": {
                     "type": "string",
                     "minLength": 8
+                },
+                "token": {
+                    "type": "string"
                 }
             }
         },

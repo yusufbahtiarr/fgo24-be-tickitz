@@ -41,7 +41,7 @@ func RegisterUser(reqUser dto.RegisterUserRequest) error {
 		}
 	}()
 
-	queryProfile := `INSERT INTO profile (created_at, updated_at) VALUES (now(), now()) RETURNING id`
+	queryProfile := `INSERT INTO profiles DEFAULT VALUES RETURNING id`
 	var profileID int
 	err = trx.QueryRow(ctx, queryProfile).Scan(&profileID)
 	if err != nil {
@@ -69,7 +69,7 @@ func RegisterUser(reqUser dto.RegisterUserRequest) error {
 func CheckUserExistsByEmail(email string) (bool, error) {
 	conn, err := db.ConnectDB()
 	if err != nil {
-		return false, fmt.Errorf("failed to connect to database")
+		return false, err
 	}
 	defer conn.Close()
 
@@ -83,7 +83,7 @@ func CheckUserExistsByEmail(email string) (bool, error) {
 			return false, nil
 		}
 
-		return false, fmt.Errorf("failed to check user existence")
+		return false, err
 	}
 
 	return true, nil
@@ -96,17 +96,17 @@ func ResetPassword(id int, newData dto.ResetPasswordRequest) error {
 	}
 	defer conn.Close()
 
-	if newData.Password == "" && newData.ConfirmPassword == "" {
-		return fmt.Errorf("input password cannot be empty")
+	if newData.NewPassword == "" && newData.ConfirmPassword == "" {
+		return err
 	}
 
-	if newData.Password != newData.ConfirmPassword {
-		return fmt.Errorf("password and confirm password do not match")
+	if newData.NewPassword != newData.ConfirmPassword {
+		return err
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newData.Password), bcrypt.DefaultCost)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newData.NewPassword), bcrypt.DefaultCost)
 	if err != nil {
-		return fmt.Errorf("failed to hash password")
+		return err
 	}
 
 	_, err = conn.Exec(context.Background(), `UPDATE users set password = $1, updated_at = now() where id=$2`, hashedPassword, id)

@@ -102,12 +102,15 @@ definitions:
     properties:
       confirm_password:
         type: string
-      password:
+      new_password:
         minLength: 8
+        type: string
+      token:
         type: string
     required:
     - confirm_password
-    - password
+    - new_password
+    - token
     type: object
   dto.UpdateMovieRequest:
     properties:
@@ -662,17 +665,12 @@ paths:
       summary: Register User
       tags:
       - Auth
-  /auth/reset-password/{token}:
+  /auth/reset-password:
     post:
       consumes:
       - application/json
       description: Reset user password using a valid reset token
       parameters:
-      - description: Reset token
-        in: path
-        name: token
-        required: true
-        type: string
       - description: New password data
         in: body
         name: body

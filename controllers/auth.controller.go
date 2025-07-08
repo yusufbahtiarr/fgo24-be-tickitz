@@ -107,7 +107,7 @@ func LoginUserHandler(ctx *gin.Context) {
 		fmt.Println(user)
 		ctx.JSON(http.StatusNotFound, utils.Response{
 			Success: false,
-			Message: "User with specified email not found",
+			Message: "Email is not registered",
 		})
 		return
 	}
@@ -157,19 +157,26 @@ func ForgotPasswordHandler(ctx *gin.Context) {
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, utils.Response{
 			Success: false,
-			Message: "Email not found",
+			Message: "Email not registered",
 		})
 		return
 	}
 
 	token := GeneratedResetPasswordToken(checkEmail)
 
+	err = utils.SendEmail(forgotPassword.Email, token)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, utils.Response{
+			Success: false,
+			Message: "Failed to send email",
+			Errors:  err.Error(),
+		})
+		return
+	}
+
 	ctx.JSON(http.StatusOK, utils.Response{
 		Success: true,
-		Message: "Forgot Password Success",
-		Results: map[string]string{
-			"token": token,
-		},
+		Message: "Success request forgot password. Check your email.",
 	})
 }
 
@@ -178,15 +185,13 @@ func ForgotPasswordHandler(ctx *gin.Context) {
 // @Tags         Auth
 // @Accept       json
 // @Produce      json
-// @Param        token  path      string                     true  "Reset token"
 // @Param        body   body      dto.ResetPasswordRequest   true  "New password data"
 // @Success      200    {object}  utils.Response
 // @Failure      400    {object}  utils.Response
 // @Failure      401    {object}  utils.Response
 // @Failure      404    {object}  utils.Response
-// @Router       /auth/reset-password/{token} [post]
+// @Router       /auth/reset-password [post]
 func ResetPasswordHandler(ctx *gin.Context) {
-	token := ctx.Param("token")
 	resPassword := dto.ResetPasswordRequest{}
 
 	if err := ctx.ShouldBindJSON(&resPassword); err != nil {
@@ -197,7 +202,7 @@ func ResetPasswordHandler(ctx *gin.Context) {
 		return
 	}
 
-	userID, err := models.VerifyResetPasswordToken(token)
+	userID, err := models.VerifyResetPasswordToken(resPassword.Token)
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, utils.Response{
 			Success: false,
@@ -206,11 +211,11 @@ func ResetPasswordHandler(ctx *gin.Context) {
 		return
 	}
 
-	user, err := models.FindUserByID(userID)
+	_, err = models.FindUserByID(userID)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, utils.Response{
 			Success: false,
-			Message: "User not found",
+			Message: "User does not exist",
 		})
 		return
 	}
@@ -220,15 +225,13 @@ func ResetPasswordHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, utils.Response{
 			Success: false,
 			Message: "Failed to reset password.",
-			Errors:  err.Error(),
 		})
 		return
 	}
 
 	ctx.JSON(http.StatusOK, utils.Response{
 		Success: true,
-		Message: "Reset Password Success",
-		Results: user.Email,
+		Message: "Password reset successful.",
 	})
 }
 
