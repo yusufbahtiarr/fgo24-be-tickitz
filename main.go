@@ -2,6 +2,7 @@ package main
 
 import (
 	"fgo24-be-tickitz/routers"
+	"fgo24-be-tickitz/utils"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -21,5 +22,6 @@ func main() {
 	r := gin.Default()
 	godotenv.Load()
 	routers.CombineGroup(r)
+	utils.Redis()
 	r.Run(":" + os.Getenv("APP_PORT"))
 }
