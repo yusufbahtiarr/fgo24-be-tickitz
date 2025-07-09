@@ -30,7 +30,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.repository }}:latest
+          tags: ghcr.io/yusufbahtiarr/fgo24-be-tickitz:latest
 
       - name: Copy migrations to VPS
         uses: appleboy/scp-action@v0.1.4
@@ -40,7 +40,7 @@ jobs:
           port: ${{ secrets.VPS_PORT }}
           key: ${{ secrets.VPS_PRIVATE_KEY }}
           source: "migrations"
-          target: "/home/${{ secrets.VPS_USER }}/deploy"
+          target: "/home/yusuf/deploy"
 
       - name: Deploy to VPS via SSH
         uses: appleboy/ssh-action@v1.0.0
@@ -50,13 +50,13 @@ jobs:
           port: ${{ secrets.VPS_PORT }}
           key: ${{ secrets.VPS_PRIVATE_KEY }}
           script: |
-            cd /home/${{ secrets.VPS_USER }}/deploy
-            docker pull ghcr.io/${{ github.repository }}:latest
+            cd /home/yusuf/deploy
+            docker pull ghcr.io/yusufbahtiarr/fgo24-be-tickitz:latest
             docker compose up -d postgres redis
             docker run --rm 
               --network deploy_netapp 
               -v "$PWD/migrations:/migrations" 
               migrate/migrate 
               -path=/migrations 
-              -database "postgres://postgres:1@postgres:5432/postgres?sslmode=disable" up
+              -database "postgres://postgres:1@postgres:5432/tickitz?sslmode=disable" up
             docker compose up -d --build app
