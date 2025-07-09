@@ -53,10 +53,10 @@ jobs:
             cd /home/yusuf/deploy
             docker pull ghcr.io/yusufbahtiarr/fgo24-be-tickitz:latest
             docker compose up -d postgres redis
-            docker run --rm 
-              --network deploy_netapp 
-              -v "$PWD/migrations:/migrations" 
-              migrate/migrate 
-              -path=/migrations 
-              -database "postgres://postgres:1@postgres:5432/tickitz?sslmode=disable" up
+            docker run --rm \
+              --network deploy_netapp \
+              -v "$PWD/migrations:/migrations" \
+              migrate/migrate \
+              -path=/migrations \
+              -database "postgres://postgres:1@postgres:5432/tickitz?sslmode=disable" up 
             docker compose up -d --build app
