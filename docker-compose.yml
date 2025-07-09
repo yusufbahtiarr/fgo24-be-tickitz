@@ -1,0 +1,34 @@
+services:
+  app:
+    image: ghcr.io/yusufbahtiarr/fgo24-be-tickitz:latest
+    env_file:
+      - .env
+    ports:
+      - "9703:8888"
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - netapp
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: 1
+    volumes:
+      - data_postgres:/var/lib/postgresql/data
+    networks:
+      - netapp
+
+  redis:
+    image: redis
+    volumes:
+      - data_redis:/data
+    networks:
+      - netapp
+
+volumes:
+  data_postgres: {}
+  data_redis: {}
+
+networks:
+  netapp: {}
