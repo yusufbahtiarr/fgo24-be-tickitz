@@ -1,4 +1,100 @@
-# Entity Relational Diagram Kukky
+# Tickitz - RESTful API Backend with Go
+
+A full-featured cinema ticket booking RESTful API built using Go (Gin Framework), PostgreSQL as the relational database, and Redis for caching and token management. Developed as a backend system for a cinema ticket booking platform, this RESTful API handles core functionalities such as authentication, user management, movie data processing, and transaction handling.
+
+## 🔧 Tech Stack
+
+Language: Go (Golang)  
+Framework: Gin  
+Database: PostgreSQL (SQL), Redis (NoSQL for cache & token)  
+Authentication: JWT (JSON Web Token)  
+Documentation: Swagger (OpenAPI)
+
+## ✅ Key Features
+
+- Authentication & Authorization  
+  Register, login, logout, forgot/reset password (with token), using JWT.
+- User Management  
+  View and update profile information and credentials.
+- Movie Management (Admin)  
+  View, Add, Update, Delete movies.
+- Movie Listings (Public)  
+  Get all movies, movie details, upcoming movies, now showing — with search, filtering, sorting, and Redis caching.
+- API Documentation  
+  Complete API documentation provided with Swagger UI.
+
+## Prerequisites
+
+Make sure you already install Go to run this project
+
+## How to run this project
+
+1. Create a new empty directory for the project and navigate into it
+2. Clone this project into the empty current directory:
+
+```
+git clone https://github.com/yusufbahtiarr/fgo24-be-tickitz.git .
+```
+
+3. Install dependencies
+
+```
+go mod tidy
+```
+
+4. Create a New `.env` File and Define the Environment Variables Below:
+
+```
+APP_PORT=       # Application port
+
+PGHOST=         # PostgreSQL host (e.g., localhost)
+PGPORT=         # PostgreSQL port (default: 5432)
+PGDATABASE=     # Name of the PostgreSQL database
+PGUSER=         # PostgreSQL username
+PGPASSWORD=     # PostgreSQL password
+
+RDADDRESS=      # Redis server address (e.g., localhost:6379)
+RDPASSWORD=     # Redis password (leave empty if none)
+RDDB=           # Redis database number (usually 0)
+
+APP_SECRET=     # Secret key used to sign JWT tokens
+
+EMAIL_SENDER=   # Sender email address (e.g., yourapp@gmail.com)
+EMAIL_PASSWORD= # Email password or App Password (use App Password for Gmail, not your main password)
+
+```
+
+5. Run the project
+
+```
+go run main.go
+```
+
+## Endpoints Overview
+
+| Method | Endpoint                   | Description                                         | Auth | Role       |
+| ------ | -------------------------- | --------------------------------------------------- | ---- | ---------- |
+| POST   | /auth/register             | Create new user                                     | No   | -          |
+| POST   | /auth/login                | Login                                               | No   | -          |
+| POST   | /auth/forgot-password      | Forgot password                                     | Yes  | User/Admin |
+| POST   | /auth/reset-password       | Reset password                                      | Yes  | User/Admin |
+| GET    | /admin/movies              | Get all movies data                                 | Yes  | Admin      |
+| GET    | /admin/movies/:id          | Get one movies data                                 | Yes  | Admin      |
+| POST   | /admin/movies              | Create new movie                                    | Yes  | Admin      |
+| DELETE | /admin/movies              | Delete movie                                        | Yes  | Admin      |
+| PATCH  | /admin/movies              | Update movie                                        | Yes  | Admin      |
+| GET    | /users/profile             | Get user's data                                     | Yes  | User/Admin |
+| GET    | /users/transaction-history | Get user's data transaction history                 | Yes  | User/Admin |
+| PATCH  | /users/profile             | Update user's data                                  | Yes  | User/Admin |
+| GET    | /movies                    | Get all movies data (search, filtering, sorting)    | No   | -          |
+| GET    | /movies/:id                | Get one movie data                                  | No   | -          |
+| GET    | /movies/upcoming           | Get all upcoming movie                              | No   | -          |
+| GET    | /movies/now-showing        | Get all now showing movie                           | No   | -          |
+| POST   | /transactions              | Add new transactions                                | Yes  | User       |
+| GET    | /transactions/:id/ticket   | Retrieve transaction details for the logged-in user | Yes  | User       |
+| GET    | /transactions/bookedseats  | Retrieve all reserved seats for a specific showtime | Yes  | User       |
+
+## Entity Relational Diagram Kukky
 
 This WeeklyTask Project, presents an Entity-Relationship Diagram (ERD) for an Kukky Booking Ticket system using the Mermaid diagramming tool.
 
@@ -145,3 +241,11 @@ This WeeklyTask Project, presents an Entity-Relationship Diagram (ERD) for an Ku
   }
 
 ```
+
+## 📄 License
+
+This project is licensed under the **MIT License**.
+
+## ©️ Copyright
+
+&copy; 2025 Kodacademy
