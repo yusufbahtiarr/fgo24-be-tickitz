@@ -1,4 +1,4 @@
-CREATE TABLE profile (
+CREATE TABLE profiles (
   id SERIAL PRIMARY KEY,
   fullname VARCHAR(100),
   phone VARCHAR(15),

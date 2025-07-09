@@ -1,1 +1,1 @@
-DROP TABLE profile;
+DROP TABLE profiles;
