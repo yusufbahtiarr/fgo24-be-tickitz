@@ -11,4 +11,5 @@ func movieRouter(r *gin.RouterGroup) {
 	r.GET("/:id", controllers.GetMovieByIDHandler)
 	r.GET("/upcoming", controllers.GetUpcomingMoviesHandler)
 	r.GET("/now-showing", controllers.GetNowShowingMoviesHandler)
+	r.GET("/genres", controllers.GetGenresHandler)
 }

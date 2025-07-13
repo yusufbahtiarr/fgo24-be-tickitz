@@ -327,3 +327,29 @@ func GetMovieByIDHandler(ctx *gin.Context) {
 		Results: movie,
 	})
 }
+
+// @Summary      Get All Genres
+// @Description  Get list of all movie genres
+// @Tags         Genres
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  utils.Response
+// @Failure      500  {object}  utils.Response
+// @Router       /genres [get]
+func GetGenresHandler(ctx *gin.Context) {
+	genres, err := models.GetGenres()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, utils.Response{
+			Success: false,
+			Message: "Failed to show genre",
+			Errors:  err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, utils.Response{
+		Success: true,
+		Message: "List Genre",
+		Results: genres,
+	})
+}

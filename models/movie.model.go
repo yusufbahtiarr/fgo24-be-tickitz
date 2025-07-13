@@ -40,6 +40,11 @@ type Movie struct {
 	Rating      float64   `json:"rating"`
 }
 
+type Genre struct {
+	ID        int    `json:"id"`
+	GenreName string `json:"genre_name"`
+}
+
 type Movies []Movie
 
 func GetUpcomingMovies() ([]UpcomingMovie, error) {
@@ -228,4 +233,25 @@ func GetMovieByID(id int) (Movie, error) {
 	}
 
 	return movie, nil
+}
+
+func GetGenres() ([]Genre, error) {
+	conn, err := db.ConnectDB()
+	if err != nil {
+		return []Genre{}, err
+	}
+	defer conn.Close()
+
+	query := `SELECT id, genre_name FROM genres`
+	rows, err := conn.Query(context.Background(), query)
+	if err != nil {
+		return []Genre{}, err
+	}
+
+	genres, err := pgx.CollectRows[Genre](rows, pgx.RowToStructByName)
+	if err != nil {
+		return []Genre{}, err
+	}
+
+	return genres, err
 }
