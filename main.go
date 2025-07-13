@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fgo24-be-tickitz/middlewares"
 	"fgo24-be-tickitz/routers"
 	"fgo24-be-tickitz/utils"
 	"os"
@@ -19,7 +20,9 @@ import (
 // @name Authorization
 
 func main() {
+
 	r := gin.Default()
+	r.Use(middlewares.CORSMiddlewate())
 	godotenv.Load()
 	routers.CombineGroup(r)
 	utils.Redis()
