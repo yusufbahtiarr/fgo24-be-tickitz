@@ -10,5 +10,5 @@ func authRouter(r *gin.RouterGroup) {
 	r.POST("/register", controllers.RegisterUserHandler)
 	r.POST("/login", controllers.LoginUserHandler)
 	r.POST("/forgot-password", controllers.ForgotPasswordHandler)
-	r.POST("/reset-password", controllers.ResetPasswordHandler)
+	r.POST("/reset-password/:token", controllers.ResetPasswordHandler)
 }

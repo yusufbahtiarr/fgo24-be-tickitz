@@ -22,8 +22,8 @@ func SendEmail(receiverEmail, token string) error {
 
 	body := fmt.Sprintf(`We received a request to reset your password.
 
-Use the following token to proceed with your password reset:
-%s
+Use the following token to proceed with your password reset (Valid for 10 minutes):
+http://localhost:5173/reset-password/%s
 
 Kukky App Team
 `, token)

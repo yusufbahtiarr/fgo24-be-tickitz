@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/redis/go-redis/v9"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -126,9 +127,7 @@ func LoginUserHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, utils.Response{
 		Success: true,
 		Message: "Success Login.",
-		Results: map[string]string{
-			"token": "Bearer " + token,
-		},
+		Results: token,
 	})
 }
 
@@ -136,6 +135,7 @@ func LoginUserHandler(ctx *gin.Context) {
 // @Description  Request password reset by verifying email and returning reset token
 // @Tags         Auth
 // @Accept       json
+// @Accept       x-www-form-urlencoded
 // @Produce      json
 // @Param        email  body      dto.ForgotPasswordRequest  true  "User email for password reset"
 // @Success      200    {object}  utils.Response
@@ -153,16 +153,18 @@ func ForgotPasswordHandler(ctx *gin.Context) {
 		return
 	}
 
-	checkEmail, err := models.FindUserByEmail(forgotPassword.Email)
+	user, err := models.FindUserByEmail(forgotPassword.Email)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, utils.Response{
+		ctx.JSON(http.StatusNotFound, utils.Response{
 			Success: false,
 			Message: "Email not registered",
 		})
 		return
 	}
 
-	token := GeneratedResetPasswordToken(checkEmail)
+	token := GeneratedResetPasswordToken(user)
+	redisKey := "reset_token:" + token
+	tokenValue := fmt.Sprintf("%s|%d|valid", user.ID, time.Now().Unix())
 
 	err = utils.SendEmail(forgotPassword.Email, token)
 	if err != nil {
@@ -174,6 +176,7 @@ func ForgotPasswordHandler(ctx *gin.Context) {
 		return
 	}
 
+	utils.RedisClient.Set(ctx, redisKey, tokenValue, 10*time.Minute).Err()
 	ctx.JSON(http.StatusOK, utils.Response{
 		Success: true,
 		Message: "Success request forgot password. Check your email.",
@@ -184,17 +187,31 @@ func ForgotPasswordHandler(ctx *gin.Context) {
 // @Description  Reset user password using a valid reset token
 // @Tags         Auth
 // @Accept       json
+// @Accept       x-www-form-urlencoded
 // @Produce      json
-// @Param        body   body      dto.ResetPasswordRequest   true  "New password data"
+// @Param        token   path      string   true  "Reset token"
+// @Param        new_password   formData      string   true  "New password"
+// @Param        confirm_password   formData      string   true  "Confirm password"
 // @Success      200    {object}  utils.Response
 // @Failure      400    {object}  utils.Response
 // @Failure      401    {object}  utils.Response
 // @Failure      404    {object}  utils.Response
-// @Router       /auth/reset-password [post]
+// @Router       /auth/reset-password/{token} [post]
 func ResetPasswordHandler(ctx *gin.Context) {
-	resPassword := dto.ResetPasswordRequest{}
+	token := ctx.Param("token")
 
-	if err := ctx.ShouldBindJSON(&resPassword); err != nil {
+	redisKey := "reset_token:" + token
+	_, err := utils.RedisClient.GetDel(ctx, redisKey).Result()
+	if err == redis.Nil {
+		ctx.JSON(http.StatusUnauthorized, utils.Response{
+			Success: false,
+			Message: "Reset token is invalid or already used",
+		})
+		return
+	}
+
+	resPassword := dto.ResetPasswordRequest{}
+	if err = ctx.ShouldBindJSON(&resPassword); err != nil {
 		ctx.JSON(http.StatusBadRequest, utils.Response{
 			Success: false,
 			Message: "Invalid Request",
@@ -202,7 +219,7 @@ func ResetPasswordHandler(ctx *gin.Context) {
 		return
 	}
 
-	userID, err := models.VerifyResetPasswordToken(resPassword.Token)
+	userID, err := models.VerifyResetPasswordToken(token)
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, utils.Response{
 			Success: false,
