@@ -90,7 +90,7 @@ func GetAllMoviesCreatedHandler(ctx *gin.Context) {
 	}
 
 	pageX := ctx.DefaultQuery("page", "1")
-	limitX := ctx.DefaultQuery("limit", "5")
+	limitX := ctx.DefaultQuery("limit", "10")
 
 	if releaseMonth != "" {
 		matched, err := regexp.MatchString(`^\d{4}-(0[1-9]|1[0-2])$`, releaseMonth)

@@ -110,7 +110,7 @@ func GetAllMoviesCreated(releaseMonth string, limit, offset int) ([]CreatedMovie
   ) AS genre, m.release_date, m.runtime
 	FROM movies m 
 	WHERE ($1 = '' OR TO_CHAR(m.release_date, 'YYYY-MM') = $1)
-	ORDER BY created_at DESC
+	ORDER BY m.id DESC
 	LIMIT $2 OFFSET $3;`
 	rows, err := conn.Query(context.Background(), query, releaseMonth, limit, offset)
 	if err != nil {
