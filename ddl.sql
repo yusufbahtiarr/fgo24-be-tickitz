@@ -1,13 +1,12 @@
 -- STRUCTURE
 
 CREATE TYPE role_type AS ENUM ('admin', 'user');
-CREATE TYPE status_payment_type AS ENUM('paid', 'not paid');
-CREATE TYPE status_ticket_type AS ENUM ('in active', 'used');
 
-CREATE TABLE profile (
+CREATE TABLE profiles (
   id SERIAL PRIMARY KEY,
   fullname VARCHAR(100),
   phone VARCHAR(15),
+  image_url VARCHAR(255),
   created_at TIMESTAMP(0) DEFAULT now(),
   updated_at TIMESTAMP(0) DEFAULT now()
 );
@@ -17,7 +16,7 @@ CREATE TABLE users (
   email VARCHAR(100) NOT NULL UNIQUE,
   password VARCHAR(100) NOT NULL,
   role role_type DEFAULT 'user',
-  id_profile INT NOT NULL REFERENCES profile(id) ON DELETE CASCADE,
+  id_profile INT NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   created_at TIMESTAMP(0) DEFAULT now(),
   updated_at TIMESTAMP(0) DEFAULT now()
 );
@@ -68,7 +67,7 @@ CREATE TABLE movie_genres (
 );
 CREATE TABLE movie_directors (
   id_movie INT REFERENCES movies(id) ON UPDATE CASCADE ON DELETE CASCADE,
-  id_director INT REFERENCES genres(id) ON UPDATE CASCADE ON DELETE CASCADE
+  id_director INT REFERENCES directors(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE cinemas (
@@ -104,12 +103,8 @@ CREATE TABLE transactions (
   name VARCHAR(100) NOT NULL,
   email VARCHAR(100) NOT NULL,
   phone VARCHAR(100) NOT NULL,
-  virtual_account VARCHAR(50) NOT NULL,
   total_payment INT NOT NULL,
-  transaction_date TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   movie_date DATE NOT NULL,
-  status_payment status_payment_type DEFAULT 'not paid',
-  status_ticket status_ticket_type DEFAULT 'in active',
   id_movie INT REFERENCES movies(id),
   id_cinema INT REFERENCES cinemas(id),
   id_time INT REFERENCES times(id),
