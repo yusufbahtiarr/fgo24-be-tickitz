@@ -1,8 +1,8 @@
 package utils
 
 type PageInfo struct {
-	Total      int `json:"total"`
-	Page       int `json:"page"`
+	Total      int `json:"total_data"`
+	Page       int `json:"current_page"`
 	Limit      int `json:"limit"`
 	TotalPages int `json:"total_pages"`
 }
