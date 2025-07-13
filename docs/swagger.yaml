@@ -98,20 +98,6 @@ definitions:
     - email
     - password
     type: object
-  dto.ResetPasswordRequest:
-    properties:
-      confirm_password:
-        type: string
-      new_password:
-        minLength: 8
-        type: string
-      token:
-        type: string
-    required:
-    - confirm_password
-    - new_password
-    - token
-    type: object
   dto.UpdateMovieRequest:
     properties:
       backdrop_url:
@@ -281,10 +267,10 @@ definitions:
         type: string
       phone:
         type: string
-      status_payment:
-        type: string
-      status_ticket:
-        type: string
+      seats:
+        items:
+          type: string
+        type: array
       time:
         type: string
       title:
@@ -341,11 +327,11 @@ definitions:
     type: object
   utils.PageInfo:
     properties:
+      current_page:
+        type: integer
       limit:
         type: integer
-      page:
-        type: integer
-      total:
+      total_data:
         type: integer
       total_pages:
         type: integer
@@ -571,6 +557,7 @@ paths:
     post:
       consumes:
       - application/json
+      - application/x-www-form-urlencoded
       description: Request password reset by verifying email and returning reset token
       parameters:
       - description: User email for password reset
@@ -665,18 +652,28 @@ paths:
       summary: Register User
       tags:
       - Auth
-  /auth/reset-password:
+  /auth/reset-password/{token}:
     post:
       consumes:
       - application/json
+      - application/x-www-form-urlencoded
       description: Reset user password using a valid reset token
       parameters:
-      - description: New password data
-        in: body
-        name: body
+      - description: Reset token
+        in: path
+        name: token
         required: true
-        schema:
-          $ref: '#/definitions/dto.ResetPasswordRequest'
+        type: string
+      - description: New password
+        in: formData
+        name: new_password
+        required: true
+        type: string
+      - description: Confirm password
+        in: formData
+        name: confirm_password
+        required: true
+        type: string
       produces:
       - application/json
       responses:

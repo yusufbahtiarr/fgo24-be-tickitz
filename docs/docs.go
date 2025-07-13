@@ -340,7 +340,8 @@ const docTemplate = `{
             "post": {
                 "description": "Request password reset by verifying email and returning reset token",
                 "consumes": [
-                    "application/json"
+                    "application/json",
+                    "application/x-www-form-urlencoded"
                 ],
                 "produces": [
                     "application/json"
@@ -486,11 +487,12 @@ const docTemplate = `{
                 }
             }
         },
-        "/auth/reset-password": {
+        "/auth/reset-password/{token}": {
             "post": {
                 "description": "Reset user password using a valid reset token",
                 "consumes": [
-                    "application/json"
+                    "application/json",
+                    "application/x-www-form-urlencoded"
                 ],
                 "produces": [
                     "application/json"
@@ -501,13 +503,25 @@ const docTemplate = `{
                 "summary": "Reset Password",
                 "parameters": [
                     {
-                        "description": "New password data",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.ResetPasswordRequest"
-                        }
+                        "type": "string",
+                        "description": "Reset token",
+                        "name": "token",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "New password",
+                        "name": "new_password",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Confirm password",
+                        "name": "confirm_password",
+                        "in": "formData",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -1272,26 +1286,6 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ResetPasswordRequest": {
-            "type": "object",
-            "required": [
-                "confirm_password",
-                "new_password",
-                "token"
-            ],
-            "properties": {
-                "confirm_password": {
-                    "type": "string"
-                },
-                "new_password": {
-                    "type": "string",
-                    "minLength": 8
-                },
-                "token": {
-                    "type": "string"
-                }
-            }
-        },
         "dto.UpdateMovieRequest": {
             "type": "object",
             "properties": {
@@ -1549,11 +1543,11 @@ const docTemplate = `{
                 "phone": {
                     "type": "string"
                 },
-                "status_payment": {
-                    "type": "string"
-                },
-                "status_ticket": {
-                    "type": "string"
+                "seats": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "time": {
                     "type": "string"
@@ -1641,13 +1635,13 @@ const docTemplate = `{
         "utils.PageInfo": {
             "type": "object",
             "properties": {
+                "current_page": {
+                    "type": "integer"
+                },
                 "limit": {
                     "type": "integer"
                 },
-                "page": {
-                    "type": "integer"
-                },
-                "total": {
+                "total_data": {
                     "type": "integer"
                 },
                 "total_pages": {

@@ -34,18 +34,17 @@ type OldUserProfile struct {
 }
 
 type Transaction struct {
-	ID            int       `json:"id"`
-	Name          string    `json:"name"`
-	Email         string    `json:"email"`
-	Phone         string    `json:"phone"`
-	TotalPayment  int       `json:"total_payment"`
-	MovieDate     time.Time `json:"movie_date"`
-	StatusPayment string    `json:"status_payment"`
-	StatusTicket  string    `json:"status_ticket"`
-	Title         string    `json:"title"`
-	Cinema        string    `json:"cinema"`
-	Time          time.Time `json:"time"`
-	Location      string    `json:"location"`
+	ID           int       `json:"id"`
+	Name         string    `json:"name"`
+	Email        string    `json:"email"`
+	Phone        string    `json:"phone"`
+	TotalPayment int       `json:"total_payment"`
+	MovieDate    time.Time `json:"movie_date"`
+	Title        string    `json:"title"`
+	Seats        []string  `json:"seats"`
+	Cinema       string    `json:"cinema"`
+	Time         time.Time `json:"time"`
+	Location     string    `json:"location"`
 }
 
 func FindUserByEmail(email string) (User, error) {
@@ -215,13 +214,22 @@ func GetTransactionHistory(id int) ([]Transaction, error) {
 	}
 	defer conn.Close()
 
-	query := `SELECT t.id, t.name, t.email, t.phone, t.total_payment, t.movie_date, t.status_payment, t.status_ticket, m.title, c.cinema_name as cinema, tm.time, l.location FROM transactions t
+	query := `
+	SELECT t.id, t.name, t.email, t.phone, t.total_payment, t.movie_date, m.title, 
+  (
+    SELECT ARRAY_AGG(td.seat) 
+    FROM transaction_details td
+    WHERE td.id_transaction = t.id
+  ) AS seats, 
+  	c.cinema_name AS cinema, tm.time, l.location 
+	FROM transactions t
 	JOIN movies m ON m.id = t.id_movie
 	JOIN cinemas c ON c.id = t.id_cinema
 	JOIN times tm ON tm.id = t.id_time
 	JOIN locations l ON l.id = t.id_location
 	WHERE t.id_user = $1
-	ORDER by t.created_at DESC`
+	ORDER BY t.created_at DESC;
+	`
 	rows, err := conn.Query(context.Background(), query, id)
 	if err != nil {
 		return []Transaction{}, err
