@@ -779,6 +779,63 @@ paths:
       summary: Get Movie By ID
       tags:
       - Movies
+  /movies/cinemas:
+    get:
+      consumes:
+      - application/json
+      description: Get list of all Cinema
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Get All Cinema
+      tags:
+      - Cinemas
+  /movies/genres:
+    get:
+      consumes:
+      - application/json
+      description: Get list of all movie genres
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Get All Genres
+      tags:
+      - Genres
+  /movies/locations:
+    get:
+      consumes:
+      - application/json
+      description: Get list of all locations
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Get All Locations
+      tags:
+      - Location
   /movies/now-showing:
     get:
       consumes:
@@ -800,6 +857,25 @@ paths:
       summary: Get Now Showing Movies
       tags:
       - Movies
+  /movies/times:
+    get:
+      consumes:
+      - application/json
+      description: Get list of all times
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Get All Times
+      tags:
+      - Times
   /movies/upcoming:
     get:
       consumes:

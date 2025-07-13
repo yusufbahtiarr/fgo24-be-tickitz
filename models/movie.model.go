@@ -44,6 +44,19 @@ type Genre struct {
 	ID        int    `json:"id"`
 	GenreName string `json:"genre_name"`
 }
+type Time struct {
+	ID   int    `json:"id"`
+	Time string `json:"time"`
+}
+type Location struct {
+	ID       int    `json:"id"`
+	Location string `json:"location"`
+}
+type Cinema struct {
+	ID         int    `json:"id"`
+	CinemaName string `json:"cinema_name"`
+	ImageUrl   string `json:"image_url"`
+}
 
 type Movies []Movie
 
@@ -254,4 +267,67 @@ func GetGenres() ([]Genre, error) {
 	}
 
 	return genres, err
+}
+
+func GetTimes() ([]Time, error) {
+	conn, err := db.ConnectDB()
+	if err != nil {
+		return []Time{}, err
+	}
+	defer conn.Close()
+
+	query := `SELECT id, time FROM times`
+	rows, err := conn.Query(context.Background(), query)
+	if err != nil {
+		return []Time{}, err
+	}
+
+	times, err := pgx.CollectRows[Time](rows, pgx.RowToStructByName)
+	if err != nil {
+		return []Time{}, err
+	}
+
+	return times, err
+}
+
+func GetLocations() ([]Location, error) {
+	conn, err := db.ConnectDB()
+	if err != nil {
+		return []Location{}, err
+	}
+	defer conn.Close()
+
+	query := `SELECT id, location FROM locations`
+	rows, err := conn.Query(context.Background(), query)
+	if err != nil {
+		return []Location{}, err
+	}
+
+	locations, err := pgx.CollectRows[Location](rows, pgx.RowToStructByName)
+	if err != nil {
+		return []Location{}, err
+	}
+
+	return locations, err
+}
+
+func GetCinemas() ([]Cinema, error) {
+	conn, err := db.ConnectDB()
+	if err != nil {
+		return []Cinema{}, err
+	}
+	defer conn.Close()
+
+	query := `SELECT id, cinema_name, image_url FROM cinemas`
+	rows, err := conn.Query(context.Background(), query)
+	if err != nil {
+		return []Cinema{}, err
+	}
+
+	cinemas, err := pgx.CollectRows[Cinema](rows, pgx.RowToStructByName)
+	if err != nil {
+		return []Cinema{}, err
+	}
+
+	return cinemas, err
 }

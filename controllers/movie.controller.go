@@ -335,7 +335,7 @@ func GetMovieByIDHandler(ctx *gin.Context) {
 // @Produce      json
 // @Success      200  {object}  utils.Response
 // @Failure      500  {object}  utils.Response
-// @Router       /genres [get]
+// @Router       /movies/genres [get]
 func GetGenresHandler(ctx *gin.Context) {
 	genres, err := models.GetGenres()
 	if err != nil {
@@ -351,5 +351,83 @@ func GetGenresHandler(ctx *gin.Context) {
 		Success: true,
 		Message: "List Genre",
 		Results: genres,
+	})
+}
+
+// @Summary      Get All Times
+// @Description  Get list of all times
+// @Tags         Times
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  utils.Response
+// @Failure      500  {object}  utils.Response
+// @Router       /movies/times [get]
+func GetTimesHandler(ctx *gin.Context) {
+	times, err := models.GetTimes()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, utils.Response{
+			Success: false,
+			Message: "Failed to show times",
+			Errors:  err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, utils.Response{
+		Success: true,
+		Message: "List times",
+		Results: times,
+	})
+}
+
+// @Summary      Get All Locations
+// @Description  Get list of all locations
+// @Tags         Location
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  utils.Response
+// @Failure      500  {object}  utils.Response
+// @Router       /movies/locations [get]
+func GetLocationsHandler(ctx *gin.Context) {
+	location, err := models.GetLocations()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, utils.Response{
+			Success: false,
+			Message: "Failed to show location",
+			Errors:  err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, utils.Response{
+		Success: true,
+		Message: "List location",
+		Results: location,
+	})
+}
+
+// @Summary      Get All Cinema
+// @Description  Get list of all Cinema
+// @Tags         Cinemas
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  utils.Response
+// @Failure      500  {object}  utils.Response
+// @Router       /movies/cinemas [get]
+func GetCinemasHandler(ctx *gin.Context) {
+	cinema, err := models.GetCinemas()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, utils.Response{
+			Success: false,
+			Message: "Failed to show cinema",
+			Errors:  err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, utils.Response{
+		Success: true,
+		Message: "List Cinema",
+		Results: cinema,
 	})
 }
