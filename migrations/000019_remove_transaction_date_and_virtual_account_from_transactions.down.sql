@@ -1,3 +1,0 @@
-ALTER TABLE transactions
-ADD COLUMN transaction_date TIMESTAMP WITHOUT TIME ZONE,
-ADD COLUMN virtual_account VARCHAR(50);
