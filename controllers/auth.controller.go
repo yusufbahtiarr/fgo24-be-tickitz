@@ -187,11 +187,8 @@ func ForgotPasswordHandler(ctx *gin.Context) {
 // @Description  Reset user password using a valid reset token
 // @Tags         Auth
 // @Accept       json
-// @Accept       x-www-form-urlencoded
 // @Produce      json
-// @Param        token   path      string   true  "Reset token"
-// @Param        new_password   formData      string   true  "New password"
-// @Param        confirm_password   formData      string   true  "Confirm password"
+// @Param        email  body      dto.ResetPasswordRequest  true  "User email for password reset"
 // @Success      200    {object}  utils.Response
 // @Failure      400    {object}  utils.Response
 // @Failure      401    {object}  utils.Response

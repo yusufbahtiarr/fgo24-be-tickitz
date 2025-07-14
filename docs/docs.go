@@ -491,8 +491,7 @@ const docTemplate = `{
             "post": {
                 "description": "Reset user password using a valid reset token",
                 "consumes": [
-                    "application/json",
-                    "application/x-www-form-urlencoded"
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -503,25 +502,13 @@ const docTemplate = `{
                 "summary": "Reset Password",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Reset token",
-                        "name": "token",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "New password",
-                        "name": "new_password",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Confirm password",
-                        "name": "confirm_password",
-                        "in": "formData",
-                        "required": true
+                        "description": "User email for password reset",
+                        "name": "email",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResetPasswordRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -745,6 +732,35 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/models.NowShowingMovie"
                             }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/movies/payment-methods": {
+            "get": {
+                "description": "Get list of all Payment Method",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Payment Methods"
+                ],
+                "summary": "Get All Payment Method",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
                         }
                     },
                     "500": {
@@ -1397,6 +1413,22 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
+                    "type": "string",
+                    "minLength": 8
+                }
+            }
+        },
+        "dto.ResetPasswordRequest": {
+            "type": "object",
+            "required": [
+                "confirm_password",
+                "new_password"
+            ],
+            "properties": {
+                "confirm_password": {
+                    "type": "string"
+                },
+                "new_password": {
                     "type": "string",
                     "minLength": 8
                 }

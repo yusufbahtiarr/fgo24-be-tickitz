@@ -98,6 +98,17 @@ definitions:
     - email
     - password
     type: object
+  dto.ResetPasswordRequest:
+    properties:
+      confirm_password:
+        type: string
+      new_password:
+        minLength: 8
+        type: string
+    required:
+    - confirm_password
+    - new_password
+    type: object
   dto.UpdateMovieRequest:
     properties:
       backdrop_url:
@@ -656,24 +667,14 @@ paths:
     post:
       consumes:
       - application/json
-      - application/x-www-form-urlencoded
       description: Reset user password using a valid reset token
       parameters:
-      - description: Reset token
-        in: path
-        name: token
+      - description: User email for password reset
+        in: body
+        name: email
         required: true
-        type: string
-      - description: New password
-        in: formData
-        name: new_password
-        required: true
-        type: string
-      - description: Confirm password
-        in: formData
-        name: confirm_password
-        required: true
-        type: string
+        schema:
+          $ref: '#/definitions/dto.ResetPasswordRequest'
       produces:
       - application/json
       responses:
@@ -857,6 +858,25 @@ paths:
       summary: Get Now Showing Movies
       tags:
       - Movies
+  /movies/payment-methods:
+    get:
+      consumes:
+      - application/json
+      description: Get list of all Payment Method
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Get All Payment Method
+      tags:
+      - Payment Methods
   /movies/times:
     get:
       consumes:
