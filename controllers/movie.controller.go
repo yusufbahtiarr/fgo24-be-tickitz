@@ -431,3 +431,29 @@ func GetCinemasHandler(ctx *gin.Context) {
 		Results: cinema,
 	})
 }
+
+// @Summary      Get All Payment Method
+// @Description  Get list of all Payment Method
+// @Tags         Payment Methods
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  utils.Response
+// @Failure      500  {object}  utils.Response
+// @Router       /movies/payment-methods [get]
+func GetPaymentMethodsHandler(ctx *gin.Context) {
+	paymentMethod, err := models.GetPaymentMethods()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, utils.Response{
+			Success: false,
+			Message: "Failed to show payment methods",
+			Errors:  err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, utils.Response{
+		Success: true,
+		Message: "List payment methods",
+		Results: paymentMethod,
+	})
+}

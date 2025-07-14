@@ -57,6 +57,11 @@ type Cinema struct {
 	CinemaName string `json:"cinema_name"`
 	ImageUrl   string `json:"image_url"`
 }
+type PaymentMethod struct {
+	ID            int    `json:"id"`
+	PaymentMethod string `json:"payment_method"`
+	ImageUrl      string `json:"image_url"`
+}
 
 type Movies []Movie
 
@@ -330,4 +335,25 @@ func GetCinemas() ([]Cinema, error) {
 	}
 
 	return cinemas, err
+}
+
+func GetPaymentMethods() ([]PaymentMethod, error) {
+	conn, err := db.ConnectDB()
+	if err != nil {
+		return []PaymentMethod{}, err
+	}
+	defer conn.Close()
+
+	query := `SELECT id, payment_method, image_url FROM payment_methods`
+	rows, err := conn.Query(context.Background(), query)
+	if err != nil {
+		return []PaymentMethod{}, err
+	}
+
+	paymentMethod, err := pgx.CollectRows[PaymentMethod](rows, pgx.RowToStructByName)
+	if err != nil {
+		return []PaymentMethod{}, err
+	}
+
+	return paymentMethod, err
 }
