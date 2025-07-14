@@ -41,7 +41,7 @@ func RegisterUser(reqUser dto.RegisterUserRequest) error {
 		}
 	}()
 
-	queryProfile := `INSERT INTO profiles DEFAULT VALUES RETURNING id`
+	queryProfile := `INSERT INTO profiles (fullname, phone) VALUES (NULL, NULL) RETURNING id`
 	var profileID int
 	err = trx.QueryRow(ctx, queryProfile).Scan(&profileID)
 	if err != nil {
