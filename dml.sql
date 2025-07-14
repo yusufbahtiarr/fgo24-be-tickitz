@@ -184,10 +184,10 @@ VALUES
 
 INSERT INTO cinemas (cinema_name, image_url)
 VALUES 
-('Ebv', '../assets/images/ebv.png'),
-('Hiflix', '../assets/images/hiflix.png'),
-('CineOne21', '../assets/images/cineone21.png'),
-('XXI', '../assets/images/xxi.png');
+('Ebv', '/assets/ebv.png'),
+('Hiflix', '/assets/hiflix.png'),
+('CineOne21', '/assets/cineone21.png'),
+('XXI', '/assets/xxi.png');
 
 INSERT INTO locations (location)
 VALUES
@@ -207,14 +207,14 @@ VALUES
 
 INSERT INTO payment_methods (payment_method, image_url)
 VALUES
-('Google Pay', '../assets/images/gpay.png'),
-('Visa', '../assets/images/visa.png'),
-('Gopay', '../assets/images/gopay.png'),
-('Paypal', '../assets/images/paypal.png'),
-('Dana', '../assets/images/dana.png'),
-('BCA', '../assets/images/bca.png'),
-('BRI', '../assets/images/bri.png'),
-('OVO', '../assets/images/ovo.png');
+('Google Pay', '/assets/gpay.png'),
+('Visa', '/assets/visa.png'),
+('Gopay', '/assets/gopay.png'),
+('Paypal', '/assets/paypal.png'),
+('Dana', '/assets/dana.png'),
+('BCA', '/assets/bca.png'),
+('BRI', '/assets/bri.png'),
+('OVO', '/assets/ovo.png');
 
 INSERT INTO movies (poster_url, backdrop_url, title, release_date, runtime, overview, rating)
 VALUES
