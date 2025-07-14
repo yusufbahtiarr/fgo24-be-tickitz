@@ -228,7 +228,7 @@ func GetTransactionHistory(id int) ([]Transaction, error) {
 	JOIN times tm ON tm.id = t.id_time
 	JOIN locations l ON l.id = t.id_location
 	WHERE t.id_user = $1
-	ORDER BY t.created_at DESC;
+	ORDER BY t.id DESC;
 	`
 	rows, err := conn.Query(context.Background(), query, id)
 	if err != nil {
