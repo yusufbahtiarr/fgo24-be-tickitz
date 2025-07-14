@@ -1,5 +1,4 @@
 name: Push Image to GHCR and Deploy to VPS
-run-name: Release Image to GHCR and Deploy to VPS
 
 on:
   push:
@@ -32,14 +31,14 @@ jobs:
           push: true
           tags: ghcr.io/yusufbahtiarr/fgo24-be-tickitz:latest
 
-      - name: Copy migrations to VPS
+      - name: Copy migrations and data to VPS
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           port: ${{ secrets.VPS_PORT }}
           key: ${{ secrets.VPS_PRIVATE_KEY }}
-          source: "migrations"
+          source: "migrations,dmlsql"
           target: "/home/yusuf/deploy"
 
       - name: Deploy to VPS via SSH
@@ -51,13 +50,21 @@ jobs:
           key: ${{ secrets.VPS_PRIVATE_KEY }}
           script: |
             cd /home/yusuf/deploy
+
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             docker pull ghcr.io/yusufbahtiarr/fgo24-be-tickitz:latest
+
             docker compose up -d postgres redis
+
+            sleep 10
+
             docker run --rm \
               --network deploy_netapp \
               -v "$PWD/migrations:/migrations" \
               migrate/migrate \
               -path=/migrations \
-              -database "postgres://postgres:1@postgres:5432/postgres?sslmode=disable" up 
+              -database "postgres://postgres:1@postgres:5432/postgres?sslmode=disable" up
+
+            docker exec -i deploy-postgres-1 psql -U postgres -d postgres < initdb/dml.sql
+
             docker compose up -d --build app
