@@ -117,10 +117,6 @@ func GetBookedSeatsInfo(movieID int, date string, timeID, locationID, cinemaID i
 		seats = append(seats, seat)
 	}
 
-	if len(seats) == 0 {
-		return nil, fmt.Errorf("no booked seats found")
-	}
-
 	return seats, nil
 }
 
