@@ -65,6 +65,6 @@ jobs:
               -path=/migrations \
               -database "postgres://postgres:1@postgres:5432/postgres?sslmode=disable" up
 
-            docker exec -i deploy-postgres-1 psql -U postgres -d postgres < dmlsql/dml.sql
+            # docker exec -i deploy-postgres-1 psql -U postgres -d postgres < dmlsql/dml.sql
 
             docker compose up -d --build app
