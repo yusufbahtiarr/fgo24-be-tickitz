@@ -18,6 +18,7 @@ type TicketResult struct {
 }
 
 type TransactionResult struct {
+	ID            string        `json:"id"`
 	Name          string        `json:"name"`
 	Email         string        `json:"email"`
 	Phone         string        `json:"phone"`
@@ -217,7 +218,7 @@ func CreateTransaction(userId int, NewTransaction dto.CreateTransactionRequest) 
 		}
 	}
 	var result TransactionResult
-	query2 := `SELECT t.name, t.email, t.phone, t.total_payment, t.movie_date, m.title, c.cinema_name, tm.time, l.location, pm.payment_method 
+	query2 := `SELECT t.id, t.name, t.email, t.phone, t.total_payment, t.movie_date, m.title, c.cinema_name, tm.time, l.location, pm.payment_method 
 	FROM transactions t 
 	JOIN movies m ON m.id = t.id_movie
 	JOIN cinemas c ON c.id = t.id_cinema
@@ -229,6 +230,7 @@ func CreateTransaction(userId int, NewTransaction dto.CreateTransactionRequest) 
 	var movieDate time.Time
 	var showTime time.Time
 	err = trx.QueryRow(ctx, query2, transactionID).Scan(
+		&result.ID,
 		&result.Name,
 		&result.Email,
 		&result.Phone,
