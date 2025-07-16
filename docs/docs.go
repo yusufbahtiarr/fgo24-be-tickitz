@@ -94,7 +94,7 @@ const docTemplate = `{
                 ],
                 "description": "Create movie with genre, cast, and director",
                 "consumes": [
-                    "application/json"
+                    "multipart/form-data"
                 ],
                 "produces": [
                     "application/json"
@@ -105,13 +105,86 @@ const docTemplate = `{
                 "summary": "Create new movie",
                 "parameters": [
                     {
-                        "description": "Movie payload",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.CreateMovieRequest"
-                        }
+                        "type": "string",
+                        "description": "Movie title",
+                        "name": "title",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Poster image",
+                        "name": "poster",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Backdrop image",
+                        "name": "backdrop",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Release date",
+                        "name": "release_date",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Runtime (minutes)",
+                        "name": "runtime",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Movie overview",
+                        "name": "overview",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "Rating (0.0 - 10.0)",
+                        "name": "rating",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "Genre IDs (multiple allowed)",
+                        "name": "genres",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "Cast IDs",
+                        "name": "casts",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "Director IDs",
+                        "name": "directors",
+                        "in": "formData",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -1275,62 +1348,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "dto.CreateMovieRequest": {
-            "type": "object",
-            "required": [
-                "backdrop_url",
-                "casts",
-                "directors",
-                "genres",
-                "overview",
-                "poster_url",
-                "rating",
-                "release_date",
-                "runtime",
-                "title"
-            ],
-            "properties": {
-                "backdrop_url": {
-                    "type": "string"
-                },
-                "casts": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
-                "directors": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
-                "genres": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
-                "overview": {
-                    "type": "string"
-                },
-                "poster_url": {
-                    "type": "string"
-                },
-                "rating": {
-                    "type": "number"
-                },
-                "release_date": {
-                    "type": "string"
-                },
-                "runtime": {
-                    "type": "integer"
-                },
-                "title": {
-                    "type": "string"
-                }
-            }
-        },
         "dto.CreateTransactionRequest": {
             "type": "object",
             "properties": {
@@ -1715,6 +1732,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "email": {
+                    "type": "string"
+                },
+                "id": {
                     "type": "string"
                 },
                 "location": {

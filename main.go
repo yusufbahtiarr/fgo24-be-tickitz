@@ -22,7 +22,7 @@ import (
 func main() {
 
 	r := gin.Default()
-	r.Use(middlewares.CORSMiddlewate())
+	r.Use(middlewares.CORSMiddleware())
 	godotenv.Load()
 	routers.CombineGroup(r)
 	utils.Redis()

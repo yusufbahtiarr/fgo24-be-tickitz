@@ -33,7 +33,7 @@ type DetailCreatedMovie struct {
 	Overview    string    `json:"overview"`
 }
 
-func CreateMovie(movie dto.CreateMovieRequest) error {
+func CreateMovie(movie dto.CreateMovieRequest, backdropUrl string, posterUrl string) error {
 	conn, err := db.ConnectDB()
 	if err != nil {
 		return err
@@ -55,8 +55,8 @@ func CreateMovie(movie dto.CreateMovieRequest) error {
 	var idMovie int
 	err = conn.QueryRow(ctx, query,
 		movie.Title,
-		movie.BackdropUrl,
-		movie.PosterUrl,
+		backdropUrl,
+		posterUrl,
 		movie.ReleaseDate,
 		movie.Runtime,
 		movie.Overview,

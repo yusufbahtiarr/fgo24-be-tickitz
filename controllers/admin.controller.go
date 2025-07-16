@@ -11,18 +11,28 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // @Summary     Create new movie
 // @Description Create movie with genre, cast, and director
 // @Tags        Admins
-// @Accept      json
+// @Accept      multipart/form-data
 // @Produce     json
-// @Param       request body dto.CreateMovieRequest true "Movie payload"
+// @Param       title         formData string  true  "Movie title"
+// @Param       poster        formData file    true  "Poster image"
+// @Param       backdrop      formData file    true  "Backdrop image"
+// @Param       release_date  formData string  true  "Release date"
+// @Param       runtime       formData int     true  "Runtime (minutes)"
+// @Param       overview      formData string  true  "Movie overview"
+// @Param       rating        formData number  true  "Rating (0.0 - 10.0)"
+// @Param       genres        formData []int   true  "Genre IDs (multiple allowed)"
+// @Param       casts         formData []int   true  "Cast IDs"
+// @Param       directors     formData []int   true  "Director IDs"
 // @Success     201 {object} utils.Response
 // @Failure     400 {object} utils.Response
 // @Failure     500 {object} utils.Response
-// @Security     BearerAuth
+// @Security    BearerAuth
 // @Router      /admin/movies [post]
 func CreateMovieHandler(ctx *gin.Context) {
 	movie := dto.CreateMovieRequest{}
@@ -37,7 +47,7 @@ func CreateMovieHandler(ctx *gin.Context) {
 		return
 	}
 
-	if err := ctx.ShouldBindJSON(&movie); err != nil {
+	if err := ctx.ShouldBind(&movie); err != nil {
 		ctx.JSON(http.StatusBadRequest, utils.Response{
 			Success: false,
 			Message: "Invalid request movie",
@@ -46,7 +56,97 @@ func CreateMovieHandler(ctx *gin.Context) {
 		return
 	}
 
-	err := models.CreateMovie(movie)
+	for _, str := range strings.Split(movie.GenresRaw, ",") {
+		id, err := strconv.Atoi(strings.TrimSpace(str))
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, utils.Response{
+				Success: false,
+				Message: "Invalid genre ID format",
+				Errors:  err.Error(),
+			})
+			return
+		}
+		movie.Genres = append(movie.Genres, id)
+	}
+
+	for _, str := range strings.Split(movie.CastsRaw, ",") {
+		id, err := strconv.Atoi(strings.TrimSpace(str))
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, utils.Response{
+				Success: false,
+				Message: "Invalid cast ID format",
+				Errors:  err.Error(),
+			})
+			return
+		}
+		movie.Casts = append(movie.Casts, id)
+	}
+
+	for _, str := range strings.Split(movie.DirectorsRaw, ",") {
+		id, err := strconv.Atoi(strings.TrimSpace(str))
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, utils.Response{
+				Success: false,
+				Message: "Invalid director ID format",
+				Errors:  err.Error(),
+			})
+			return
+		}
+		movie.Directors = append(movie.Directors, id)
+	}
+
+	posterFile, err := ctx.FormFile("poster")
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, utils.Response{
+			Success: false,
+			Message: "Poster file is required",
+			Errors:  err.Error(),
+		})
+		return
+	}
+
+	posterFilename := fmt.Sprintf("uploads/posters/%s_%s", uuid.New().String(), posterFile.Filename)
+	if err = ctx.SaveUploadedFile(posterFile, posterFilename); err != nil {
+		ctx.JSON(http.StatusInternalServerError, utils.Response{
+			Success: false,
+			Message: "Failed to save poster file",
+			Errors:  err.Error(),
+		})
+		return
+	}
+
+	backdropFile, err := ctx.FormFile("backdrop")
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, utils.Response{
+			Success: false,
+			Message: "Backdrop file is required",
+			Errors:  err.Error(),
+		})
+		return
+	}
+
+	backdropFilename := fmt.Sprintf("uploads/backdrops/%s_%s", uuid.New().String(), backdropFile.Filename)
+	if err = ctx.SaveUploadedFile(backdropFile, backdropFilename); err != nil {
+		ctx.JSON(http.StatusInternalServerError, utils.Response{
+			Success: false,
+			Message: "Failed to save backdrop file",
+			Errors:  err.Error(),
+		})
+		return
+	}
+
+	newMovie := dto.CreateMovieRequest{
+		Title:       movie.Title,
+		ReleaseDate: movie.ReleaseDate,
+		Runtime:     movie.Runtime,
+		Overview:    movie.Overview,
+		Rating:      movie.Rating,
+		Genres:      movie.Genres,
+		Casts:       movie.Casts,
+		Directors:   movie.Directors,
+	}
+
+	err = models.CreateMovie(newMovie, backdropFilename, posterFilename)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, utils.Response{
 			Success: false,
@@ -60,7 +160,7 @@ func CreateMovieHandler(ctx *gin.Context) {
 		Success: true,
 		Message: "Success Create Movie",
 		Results: map[string]string{
-			"title": movie.Title,
+			"title": newMovie.Title,
 		}})
 }
 

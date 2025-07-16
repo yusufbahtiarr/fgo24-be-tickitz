@@ -1,45 +1,5 @@
 basePath: /
 definitions:
-  dto.CreateMovieRequest:
-    properties:
-      backdrop_url:
-        type: string
-      casts:
-        items:
-          type: integer
-        type: array
-      directors:
-        items:
-          type: integer
-        type: array
-      genres:
-        items:
-          type: integer
-        type: array
-      overview:
-        type: string
-      poster_url:
-        type: string
-      rating:
-        type: number
-      release_date:
-        type: string
-      runtime:
-        type: integer
-      title:
-        type: string
-    required:
-    - backdrop_url
-    - casts
-    - directors
-    - genres
-    - overview
-    - poster_url
-    - rating
-    - release_date
-    - runtime
-    - title
-    type: object
   dto.CreateTransactionRequest:
     properties:
       email:
@@ -295,6 +255,8 @@ definitions:
         type: string
       email:
         type: string
+      id:
+        type: string
       location:
         type: string
       movie_date:
@@ -409,15 +371,68 @@ paths:
       - Admins
     post:
       consumes:
-      - application/json
+      - multipart/form-data
       description: Create movie with genre, cast, and director
       parameters:
-      - description: Movie payload
-        in: body
-        name: request
+      - description: Movie title
+        in: formData
+        name: title
         required: true
-        schema:
-          $ref: '#/definitions/dto.CreateMovieRequest'
+        type: string
+      - description: Poster image
+        in: formData
+        name: poster
+        required: true
+        type: file
+      - description: Backdrop image
+        in: formData
+        name: backdrop
+        required: true
+        type: file
+      - description: Release date
+        in: formData
+        name: release_date
+        required: true
+        type: string
+      - description: Runtime (minutes)
+        in: formData
+        name: runtime
+        required: true
+        type: integer
+      - description: Movie overview
+        in: formData
+        name: overview
+        required: true
+        type: string
+      - description: Rating (0.0 - 10.0)
+        in: formData
+        name: rating
+        required: true
+        type: number
+      - collectionFormat: csv
+        description: Genre IDs (multiple allowed)
+        in: formData
+        items:
+          type: integer
+        name: genres
+        required: true
+        type: array
+      - collectionFormat: csv
+        description: Cast IDs
+        in: formData
+        items:
+          type: integer
+        name: casts
+        required: true
+        type: array
+      - collectionFormat: csv
+        description: Director IDs
+        in: formData
+        items:
+          type: integer
+        name: directors
+        required: true
+        type: array
       produces:
       - application/json
       responses:
