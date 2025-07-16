@@ -11,6 +11,7 @@ func SendEmail(receiverEmail, token string) error {
 	smtpPort := "587"
 	senderEmail := os.Getenv("EMAIL_SENDER")
 	senderPassword := os.Getenv("EMAIL_PASSWORD")
+	host := "http://146.190.102.54:9702/"
 
 	auth := smtp.PlainAuth("", senderEmail, senderPassword, smtpHost)
 
@@ -23,10 +24,10 @@ func SendEmail(receiverEmail, token string) error {
 	body := fmt.Sprintf(`We received a request to reset your password.
 
 Use the following token to proceed with your password reset (Valid for 10 minutes):
-http://localhost:5173/reset-password/%s
+%s/reset-password/%s
 
 Kukky App Team
-`, token)
+`, host, token)
 
 	message := []byte(subject + headers + "\r\n" + body)
 
