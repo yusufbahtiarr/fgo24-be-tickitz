@@ -795,6 +795,25 @@ paths:
       summary: Get Movie By ID
       tags:
       - Movies
+  /movies/casts:
+    get:
+      consumes:
+      - application/json
+      description: Get list of all Casts
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Get All Casts
+      tags:
+      - Movies
   /movies/cinemas:
     get:
       consumes:
@@ -813,7 +832,7 @@ paths:
             $ref: '#/definitions/utils.Response'
       summary: Get All Cinema
       tags:
-      - Cinemas
+      - Movies
   /movies/genres:
     get:
       consumes:
@@ -832,7 +851,7 @@ paths:
             $ref: '#/definitions/utils.Response'
       summary: Get All Genres
       tags:
-      - Genres
+      - Movies
   /movies/locations:
     get:
       consumes:
@@ -851,7 +870,7 @@ paths:
             $ref: '#/definitions/utils.Response'
       summary: Get All Locations
       tags:
-      - Location
+      - Movies
   /movies/now-showing:
     get:
       consumes:
@@ -891,7 +910,7 @@ paths:
             $ref: '#/definitions/utils.Response'
       summary: Get All Payment Method
       tags:
-      - Payment Methods
+      - Movies
   /movies/times:
     get:
       consumes:
@@ -910,7 +929,7 @@ paths:
             $ref: '#/definitions/utils.Response'
       summary: Get All Times
       tags:
-      - Times
+      - Movies
   /movies/upcoming:
     get:
       consumes:

@@ -330,7 +330,7 @@ func GetMovieByIDHandler(ctx *gin.Context) {
 
 // @Summary      Get All Genres
 // @Description  Get list of all movie genres
-// @Tags         Genres
+// @Tags         Movies
 // @Accept       json
 // @Produce      json
 // @Success      200  {object}  utils.Response
@@ -356,7 +356,7 @@ func GetGenresHandler(ctx *gin.Context) {
 
 // @Summary      Get All Times
 // @Description  Get list of all times
-// @Tags         Times
+// @Tags         Movies
 // @Accept       json
 // @Produce      json
 // @Success      200  {object}  utils.Response
@@ -382,7 +382,7 @@ func GetTimesHandler(ctx *gin.Context) {
 
 // @Summary      Get All Locations
 // @Description  Get list of all locations
-// @Tags         Location
+// @Tags         Movies
 // @Accept       json
 // @Produce      json
 // @Success      200  {object}  utils.Response
@@ -408,7 +408,7 @@ func GetLocationsHandler(ctx *gin.Context) {
 
 // @Summary      Get All Cinema
 // @Description  Get list of all Cinema
-// @Tags         Cinemas
+// @Tags         Movies
 // @Accept       json
 // @Produce      json
 // @Success      200  {object}  utils.Response
@@ -434,7 +434,7 @@ func GetCinemasHandler(ctx *gin.Context) {
 
 // @Summary      Get All Payment Method
 // @Description  Get list of all Payment Method
-// @Tags         Payment Methods
+// @Tags         Movies
 // @Accept       json
 // @Produce      json
 // @Success      200  {object}  utils.Response
@@ -455,5 +455,31 @@ func GetPaymentMethodsHandler(ctx *gin.Context) {
 		Success: true,
 		Message: "List payment methods",
 		Results: paymentMethod,
+	})
+}
+
+// @Summary      Get All Casts
+// @Description  Get list of all Casts
+// @Tags         Movies
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  utils.Response
+// @Failure      500  {object}  utils.Response
+// @Router       /movies/casts [get]
+func GetCastsHandler(ctx *gin.Context) {
+	casts, err := models.GetCasts()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, utils.Response{
+			Success: false,
+			Message: "Failed to show casts",
+			Errors:  err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, utils.Response{
+		Success: true,
+		Message: "List casts",
+		Results: casts,
 	})
 }

@@ -62,6 +62,10 @@ type PaymentMethod struct {
 	PaymentMethod string `json:"payment_method"`
 	ImageUrl      string `json:"image_url"`
 }
+type Cast struct {
+	ID   int    `json:"id" db:"id"`
+	Cast string `json:"cast_name" db:"cast_name"`
+}
 
 type Movies []Movie
 
@@ -356,4 +360,25 @@ func GetPaymentMethods() ([]PaymentMethod, error) {
 	}
 
 	return paymentMethod, err
+}
+
+func GetCasts() ([]Cast, error) {
+	conn, err := db.ConnectDB()
+	if err != nil {
+		return []Cast{}, err
+	}
+	defer conn.Close()
+
+	query := `SELECT id, cast_name FROM casts`
+	rows, err := conn.Query(context.Background(), query)
+	if err != nil {
+		return []Cast{}, err
+	}
+
+	casts, err := pgx.CollectRows[Cast](rows, pgx.RowToStructByName)
+	if err != nil {
+		return []Cast{}, err
+	}
+
+	return casts, err
 }

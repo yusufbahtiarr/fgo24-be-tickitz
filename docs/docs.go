@@ -697,6 +697,35 @@ const docTemplate = `{
                 }
             }
         },
+        "/movies/casts": {
+            "get": {
+                "description": "Get list of all Casts",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Movies"
+                ],
+                "summary": "Get All Casts",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/movies/cinemas": {
             "get": {
                 "description": "Get list of all Cinema",
@@ -707,7 +736,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Cinemas"
+                    "Movies"
                 ],
                 "summary": "Get All Cinema",
                 "responses": {
@@ -736,7 +765,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Genres"
+                    "Movies"
                 ],
                 "summary": "Get All Genres",
                 "responses": {
@@ -765,7 +794,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Location"
+                    "Movies"
                 ],
                 "summary": "Get All Locations",
                 "responses": {
@@ -826,7 +855,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Payment Methods"
+                    "Movies"
                 ],
                 "summary": "Get All Payment Method",
                 "responses": {
@@ -855,7 +884,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Times"
+                    "Movies"
                 ],
                 "summary": "Get All Times",
                 "responses": {
