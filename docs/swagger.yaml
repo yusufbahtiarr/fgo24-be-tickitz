@@ -833,6 +833,25 @@ paths:
       summary: Get All Cinema
       tags:
       - Movies
+  /movies/directors:
+    get:
+      consumes:
+      - application/json
+      description: Get list of all Directors
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Get All Directors
+      tags:
+      - Movies
   /movies/genres:
     get:
       consumes:

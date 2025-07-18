@@ -66,6 +66,10 @@ type Cast struct {
 	ID   int    `json:"id" db:"id"`
 	Cast string `json:"cast_name" db:"cast_name"`
 }
+type Director struct {
+	ID       int    `json:"id" db:"id"`
+	Director string `json:"director_name" db:"director_name"`
+}
 
 type Movies []Movie
 
@@ -381,4 +385,25 @@ func GetCasts() ([]Cast, error) {
 	}
 
 	return casts, err
+}
+
+func GetDirectors() ([]Director, error) {
+	conn, err := db.ConnectDB()
+	if err != nil {
+		return []Director{}, err
+	}
+	defer conn.Close()
+
+	query := `SELECT id, director_name FROM directors`
+	rows, err := conn.Query(context.Background(), query)
+	if err != nil {
+		return []Director{}, err
+	}
+
+	directors, err := pgx.CollectRows[Director](rows, pgx.RowToStructByName)
+	if err != nil {
+		return []Director{}, err
+	}
+
+	return directors, err
 }

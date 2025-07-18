@@ -755,6 +755,35 @@ const docTemplate = `{
                 }
             }
         },
+        "/movies/directors": {
+            "get": {
+                "description": "Get list of all Directors",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Movies"
+                ],
+                "summary": "Get All Directors",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/movies/genres": {
             "get": {
                 "description": "Get list of all movie genres",

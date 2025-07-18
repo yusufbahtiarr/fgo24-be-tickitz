@@ -17,4 +17,5 @@ func movieRouter(r *gin.RouterGroup) {
 	r.GET("/cinemas", controllers.GetCinemasHandler)
 	r.GET("/payment-methods", controllers.GetPaymentMethodsHandler)
 	r.GET("/casts", controllers.GetCastsHandler)
+	r.GET("/directors", controllers.GetDirectorsHandler)
 }

@@ -483,3 +483,29 @@ func GetCastsHandler(ctx *gin.Context) {
 		Results: casts,
 	})
 }
+
+// @Summary      Get All Directors
+// @Description  Get list of all Directors
+// @Tags         Movies
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  utils.Response
+// @Failure      500  {object}  utils.Response
+// @Router       /movies/directors [get]
+func GetDirectorsHandler(ctx *gin.Context) {
+	directors, err := models.GetDirectors()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, utils.Response{
+			Success: false,
+			Message: "Failed to show directors",
+			Errors:  err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, utils.Response{
+		Success: true,
+		Message: "List directors",
+		Results: directors,
+	})
+}
